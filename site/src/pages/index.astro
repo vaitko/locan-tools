@@ -75,7 +75,14 @@ const principles = [
   <section class="relative overflow-hidden" id="request-a-tool">
     <div class="container-x grid items-center gap-12 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
       <div>
-        <TrustTags />
+        <div class="flex flex-wrap items-center gap-2">
+          <TrustTags />
+          {SITE.sourceUrl && (
+            <a href={SITE.sourceUrl} rel="noopener" target="_blank" class="tag border-transparent bg-ink text-cream hover:bg-ink/85">
+              <Icon name="github" size={14} /> Open source
+            </a>
+          )}
+        </div>
         <h1 class="h1 mt-6">Free Local SEO Tools for Google Search and AI Answers Visibility</h1>
         <p class="mt-6 text-xl leading-relaxed text-ink sm:text-2xl">
           <span class="mark">Need a tool that doesn't exist yet? Ask for it.</span> We build it for free and email you the link within 3 days. No commitment, no account, nothing to buy.

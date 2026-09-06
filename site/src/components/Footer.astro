@@ -22,6 +22,11 @@ const year = new Date().getFullYear();
         <ul class="mt-5 flex flex-wrap gap-2">
           {TRUST_TAGS.map((t) => <li class="tag"><Icon name="check" size={14} class="text-success" />{t}</li>)}
         </ul>
+        {SITE.sourceUrl && (
+          <a href={SITE.sourceUrl} rel="noopener" target="_blank" class="btn-secondary btn-sm mt-6 inline-flex items-center gap-2">
+            <Icon name="github" size={18} /> Open source on GitHub
+          </a>
+        )}
       </div>
 
       <nav aria-label="Free tools">
@@ -51,7 +56,7 @@ const year = new Date().getFullYear();
           <li><a href="/privacy/" class="text-[15px] text-muted hover:text-primary">Privacy</a></li>
           <li><a href="/terms/" class="text-[15px] text-muted hover:text-primary">Terms</a></li>
           <li><a href="/privacy/#cookies" class="text-[15px] text-muted hover:text-primary" data-cookie-settings>Cookie settings</a></li>
-          {SITE.sourceUrl && <li><a href={SITE.sourceUrl} rel="noopener" target="_blank" class="text-[15px] text-muted hover:text-primary">Source code (AGPL) ↗</a></li>}
+          {SITE.sourceUrl && <li><a href={SITE.sourceUrl} rel="noopener" target="_blank" class="inline-flex items-center gap-1.5 text-[15px] text-muted hover:text-primary"><Icon name="github" size={15} /> Source code (AGPL)</a></li>}
         </ul>
       </nav>
     </div>

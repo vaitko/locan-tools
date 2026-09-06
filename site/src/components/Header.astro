@@ -48,6 +48,19 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     </nav>
 
     <div class="flex items-center gap-2">
+      {SITE.sourceUrl && (
+        <a
+          href={SITE.sourceUrl}
+          rel="noopener"
+          target="_blank"
+          class="inline-flex h-10 items-center gap-2 rounded-full px-3 text-[15px] font-semibold hover:bg-surface"
+          aria-label="Source code on GitHub"
+          title="Open source on GitHub"
+        >
+          <Icon name="github" size={22} />
+          <span class="hidden xl:inline">GitHub</span>
+        </a>
+      )}
       <a href="/tools/" class="btn-primary btn-sm hidden sm:inline-flex">Use the free tools</a>
       <button
         type="button"
@@ -84,6 +97,11 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
         <a href="/tools/" class="rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">All tools</a>
         <a href="/guides/" class="rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">Guides</a>
         <a href="/about/" class="rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">Why everything is free</a>
+        {SITE.sourceUrl && (
+          <a href={SITE.sourceUrl} rel="noopener" target="_blank" class="flex items-center gap-2 rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">
+            <Icon name="github" size={18} /> Source code on GitHub
+          </a>
+        )}
       </div>
     </nav>
   </div>
