@@ -1,0 +1,204 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../../components/Breadcrumbs.astro';
+import TrustTags from '../../components/TrustTags.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import GuideCard from '../../components/GuideCard.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import Faq, { faqSchema } from '../../components/Faq.astro';
+import EmailCapture from '../../components/EmailCapture.astro';
+import Icon from '../../components/Icon.astro';
+import { TOOLS, toolUrl, guideUrl } from '../../data/tools';
+import { PILLARS, PILLAR_ORDER } from '../../data/pillars';
+import { SITE } from '../../data/site';
+
+const guides = await getCollection('guides', ({ data }) => !data.draft);
+const guideBySlug = new Map(guides.map((g) => [g.id, g]));
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Free local SEO tools', href: '/tools/' },
+];
+
+const faq = [
+  {
+    q: 'What makes these local SEO tools different from paid suites?',
+    a: 'Each tool does one job, shows its method and its limits, and gives you the whole result. Paid suites bundle the same checks behind a subscription and a dashboard you have to learn. We would rather you spend the hour on your profile than on our software.',
+  },
+  {
+    q: 'Do the tools work outside the United States?',
+    a: 'Yes. They read Google Places data, which covers every country Google Maps covers, and the AI Review Response Generator replies in the language of the review. Category names follow the language of your profile.',
+  },
+  {
+    q: 'Is there a usage limit?',
+    a: 'A generous daily limit per visitor keeps the tools free for everyone; heavy grid checks count more than a quick audit. If you hit the limit, the tool tells you and resets the next day. Agencies with many clients can run the tools per location across several days.',
+  },
+  {
+    q: 'Will you change anything on my Google Business Profile?',
+    a: 'Never. Every tool is read-only and works from public data. You get recommendations and apply the ones you agree with inside your own Google account.',
+  },
+  {
+    q: 'Which tool should I run first?',
+    a: 'Start with the Google Business Profile Optimizer for a complete audit, then the Local Rank Checker to see how your positions change across your area, then the AI Visibility Checker. The three together take under five minutes and give you a prioritised list.',
+  },
+  {
+    q: 'How do the tools stay free?',
+    a: 'They are cheap to run, we built them ourselves, and we treat them as our contribution to a market that has too many paywalls. There is no premium tier planned and we do not sell your data.',
+  },
+];
+
+const schema = [
+  breadcrumbSchema(crumbs),
+  faqSchema(faq),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': `${SITE.url}/tools/#list`,
+    name: 'Free local SEO tools',
+    numberOfItems: TOOLS.length,
+    itemListElement: TOOLS.map((t, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${SITE.url}${toolUrl(t.slug)}`,
+      name: t.name,
+      item: {
+        '@type': 'SoftwareApplication',
+        name: t.name,
+        url: `${SITE.url}${toolUrl(t.slug)}`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        isAccessibleForFree: true,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        description: t.description,
+      },
+    })),
+  },
+];
+
+const description =
+  'Seven free local SEO tools: Google Business Profile audit, category optimizer, local rank checker, AI visibility checker, LocalBusiness schema generator, review QR code and AI review replies. No signup, free forever.';
+---
+
+<BaseLayout title="Free Local SEO Tools — No Signup, Free Forever | Locan" description={description} path="/tools/" schema={schema}>
+  <section class="relative overflow-hidden">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <div class="mx-auto mt-8 max-w-3xl text-center">
+        <TrustTags class="justify-center" />
+        <h1 class="h1 mt-6">Free Local SEO Tools — No Signup, Free Forever</h1>
+        <p class="lead mt-5">
+          Seven focused tools for local businesses and the people who help them: audit and fix your Google Business Profile, see where you really rank on Google Maps, publish correct schema, collect and answer reviews, and find out whether AI assistants recommend you. Every tool is read-only, explains its method, and links to the guide that shows the fix.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS BY PILLAR -->
+  <section class="container-x pb-20">
+    <div class="space-y-16">
+      {
+        PILLAR_ORDER.map((id) => {
+          const pillar = PILLARS[id];
+          const tools = TOOLS.filter((t) => t.pillar === id);
+          const pillarGuide = guideBySlug.get(pillar.pillarGuide);
+          return (
+            <div id={id} class="scroll-mt-24">
+              <div class="flex flex-wrap items-end justify-between gap-4">
+                <div class="max-w-2xl">
+                  <p class="eyebrow">{pillar.short}</p>
+                  <h2 class="h2 mt-2">{pillar.title}</h2>
+                  <p class="mt-3 text-[16px] leading-relaxed text-muted">{pillar.description}</p>
+                </div>
+                {pillarGuide && (
+                  <a href={guideUrl(pillar.pillarGuide)} class="link inline-flex items-center gap-1.5 text-[15px]">
+                    Read the {pillar.short.toLowerCase()} guide <Icon name="arrow" size={16} />
+                  </a>
+                )}
+              </div>
+              <div class="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {tools.map((t) => <ToolCard tool={t} />)}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <!-- COMPARISON TABLE -->
+  <section class="bg-surface py-20">
+    <div class="container-x">
+      <SectionHeading eyebrow="At a glance" title="Which local SEO tool does what" text="Every tool takes one input and returns one clearly scoped report. Nothing is gated, sampled or hidden behind a trial." />
+      <div class="card mt-10 overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-[15px]">
+          <thead class="bg-primary-tint/60 text-[13px] uppercase tracking-wide text-ink/70">
+            <tr>
+              <th class="px-5 py-3.5 font-bold">Tool</th>
+              <th class="px-5 py-3.5 font-bold">You enter</th>
+              <th class="px-5 py-3.5 font-bold">You get</th>
+              <th class="px-5 py-3.5 font-bold">Time</th>
+              <th class="px-5 py-3.5 font-bold">Guide</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            {
+              TOOLS.map((t) => {
+                const g = guideBySlug.get(t.primaryGuide);
+                return (
+                  <tr class="align-top">
+                    <td class="px-5 py-4">
+                      <a href={toolUrl(t.slug)} class="font-bold text-ink hover:text-primary">{t.name}</a>
+                      <span class="mt-1 block text-[13px] text-muted">{PILLARS[t.pillar].short}</span>
+                    </td>
+                    <td class="px-5 py-4 text-ink/85">{t.input}</td>
+                    <td class="px-5 py-4 text-ink/85">
+                      <ul class="list-disc space-y-0.5 pl-4">{t.outputs.map((o) => <li>{o}</li>)}</ul>
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-ink/85">{t.time}</td>
+                    <td class="px-5 py-4">{g ? <a href={guideUrl(t.primaryGuide)} class="link">{g.data.title}</a> : '—'}</td>
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW WE BUILD -->
+  <section class="container-x py-20">
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+      <div>
+        <p class="eyebrow">How the tools are built</p>
+        <h2 class="h2 mt-3">Public data, transparent methods, honest limits</h2>
+        <p class="mt-5 text-[17px] leading-relaxed text-ink/85">
+          The tools read the same public Google data a customer sees — your profile, your competitors' profiles, the results for a search at a given location — and, where AI is involved, they say so and show their reasoning. When a result is an approximation (the rank grid, the AI visibility simulation) the page tells you exactly how it was produced and what it cannot see.
+        </p>
+        <ul class="mt-6 space-y-3 text-[15px] text-ink/85">
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-success" /> No login to Google — we never ask for access to your profile.</li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-success" /> Inputs are processed for your report and not stored.</li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-success" /> Each report ends with the guide that explains the fix, and each guide links back here.</li>
+        </ul>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {
+          PILLAR_ORDER.map((id) => {
+            const g = guideBySlug.get(PILLARS[id].pillarGuide);
+            return g ? <GuideCard slug={g.id} title={g.data.title} description={g.data.description} pillar={id} updated={g.data.updated} /> : null;
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-surface py-20">
+    <div class="container-x max-w-3xl">
+      <SectionHeading eyebrow="Questions" title="Free local SEO tools — FAQ" />
+      <div class="mt-10"><Faq items={faq} /></div>
+    </div>
+  </section>
+
+  <EmailCapture source="tools-index" />
+</BaseLayout>

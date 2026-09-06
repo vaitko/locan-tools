@@ -1,0 +1,198 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../../components/Breadcrumbs.astro';
+import Faq, { faqSchema } from '../../components/Faq.astro';
+import GuideCard from '../../components/GuideCard.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import EmailCapture from '../../components/EmailCapture.astro';
+import ManualTodo from '../../components/ManualTodo.astro';
+import Icon from '../../components/Icon.astro';
+import { TOOL_BY_SLUG, toolUrl, guideUrl } from '../../data/tools';
+import { PILLARS } from '../../data/pillars';
+import { SITE, absUrl } from '../../data/site';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  return guides.map((g) => ({ params: { slug: g.id }, props: { guide: g } }));
+}
+
+const { guide } = Astro.props;
+const { Content, headings } = await render(guide);
+const d = guide.data;
+const path = guideUrl(guide.id);
+const pillar = PILLARS[d.pillar];
+
+const all = await getCollection('guides', ({ data }) => !data.draft);
+const bySlug = new Map(all.map((g) => [g.id, g]));
+
+// Related: explicit first, then same-pillar guides, then pillar guide; never itself; max 6.
+const relatedIds = new Set<string>();
+for (const s of d.relatedGuides) if (s !== guide.id && bySlug.has(s)) relatedIds.add(s);
+if (pillar.pillarGuide !== guide.id && bySlug.has(pillar.pillarGuide)) relatedIds.add(pillar.pillarGuide);
+for (const g of all) if (g.data.pillar === d.pillar && g.id !== guide.id) relatedIds.add(g.id);
+const related = [...relatedIds].slice(0, 6).map((s) => bySlug.get(s)!);
+
+const toolSlugs = d.relatedTools.length ? d.relatedTools : pillar.tools;
+const tools = toolSlugs.map((s) => TOOL_BY_SLUG[s]).filter(Boolean);
+const primaryTool = tools[0];
+
+const toc = headings.filter((h) => h.depth === 2);
+const title = `${d.title} | ${SITE.name} Local SEO Guides`;
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Local SEO guides', href: '/guides/' },
+  { name: pillar.short, href: `/guides/#${pillar.id}` },
+  { name: d.title, href: path },
+];
+
+const schema = [
+  breadcrumbSchema(crumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: d.title,
+    description: d.description,
+    mainEntityOfPage: absUrl(path),
+    datePublished: d.published.toISOString(),
+    dateModified: d.updated.toISOString(),
+    author: { '@type': 'Organization', name: d.author === 'Locan Team' ? SITE.name : d.author, url: `${SITE.url}/about/` },
+    publisher: { '@id': `${SITE.url}/#organization` },
+    image: absUrl(SITE.ogImage),
+    articleSection: pillar.title,
+    isAccessibleForFree: true,
+  },
+  ...(d.faq.length ? [faqSchema(d.faq)] : []),
+];
+
+const fmt = (dt: Date) => dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout title={title} description={d.description} path={path} ogType="article" schema={schema}>
+  <article>
+    <header class="relative overflow-hidden border-b border-line bg-surface">
+      <div class="container-x py-10 lg:py-14">
+        <Breadcrumbs items={crumbs} />
+        <div class="mt-6 max-w-4xl">
+          <p class="eyebrow">{pillar.title}{d.level ? ` · ${d.level}` : ''}</p>
+          <h1 class="h1 mt-3">{d.title}</h1>
+          <p class="lead mt-5">{d.description}</p>
+          <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted">
+            <span class="flex items-center gap-1.5"><Icon name="user" size={16} /> By <a href="/about/#team" class="font-semibold text-ink hover:text-primary">{d.author}</a></span>
+            <span>Updated {fmt(d.updated)}</span>
+            <span>First published {fmt(d.published)}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container-x grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div class="min-w-0">
+        {
+          primaryTool && (
+            <div class="mb-10 flex flex-col gap-4 rounded-2xl border border-primary-soft bg-primary-tint p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p class="eyebrow">Free tool for this guide</p>
+                <p class="mt-1 text-lg font-extrabold text-ink">{primaryTool.name}</p>
+                <p class="mt-1 text-[14.5px] text-ink/80">{primaryTool.tagline}</p>
+              </div>
+              <a href={toolUrl(primaryTool.slug)} class="btn-primary shrink-0">Run it free <Icon name="arrow" size={16} /></a>
+            </div>
+          )
+        }
+
+        {
+          SITE.showTodos && (
+            <ManualTodo title="Owner TODO — every guide">
+              <ul>
+                <li>Replace the "Locan Team" byline with a named author once the About page has real people.</li>
+                <li>Add at least one real screenshot or first-hand example per H2 where the inline TODOs ask for it.</li>
+              </ul>
+            </ManualTodo>
+          )
+        }
+
+        <div class="prose-locan">
+          <Content />
+        </div>
+
+        {
+          primaryTool && (
+            <div class="mt-14 rounded-3xl bg-navy p-8 text-white">
+              <p class="eyebrow text-accent">Put this into practice</p>
+              <h2 class="mt-2 text-2xl font-extrabold">Run the free {primaryTool.shortName} now</h2>
+              <p class="mt-2 max-w-2xl text-white/75">{primaryTool.intro}</p>
+              <div class="mt-5 flex flex-wrap gap-3">
+                <a href={toolUrl(primaryTool.slug)} class="btn-accent">Open the {primaryTool.shortName}</a>
+                <a href="/tools/" class="btn border-2 border-white/30 text-white hover:bg-white/10">All free local SEO tools</a>
+              </div>
+            </div>
+          )
+        }
+
+        {d.faq.length > 0 && <Faq items={d.faq} title="Frequently asked questions" class="mt-16" />}
+
+        <div class="mt-12 rounded-2xl border border-line p-6 text-[15px] text-muted">
+          <p>
+            <strong class="text-ink">About the author.</strong> {d.author} — local SEO specialists who have spent years optimising Google Business Profiles and local rankings for real businesses, and who now publish free tools and guides on Locan.
+            <a href="/about/" class="link">Why everything here is free →</a>
+          </p>
+        </div>
+      </div>
+
+      <aside class="space-y-8 lg:sticky lg:top-24 lg:self-start">
+        {
+          toc.length > 2 && (
+            <nav class="card p-5" aria-label="On this page">
+              <p class="eyebrow">On this page</p>
+              <ol class="mt-3 space-y-2 text-[14px]">
+                {toc.map((h) => (
+                  <li><a href={`#${h.slug}`} class="text-muted hover:text-primary">{h.text}</a></li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+        <div>
+          <p class="eyebrow mb-3">Free tools for this topic</p>
+          <div class="grid gap-3">{tools.map((t) => <ToolCard tool={t} variant="compact" />)}</div>
+        </div>
+        <div class="card p-5">
+          <p class="eyebrow">More in {pillar.short}</p>
+          <ul class="mt-3 space-y-2.5 text-[14.5px]">
+            {
+              all
+                .filter((g) => g.data.pillar === d.pillar && g.id !== guide.id)
+                .slice(0, 8)
+                .map((g) => <li><a href={guideUrl(g.id)} class="text-ink hover:text-primary">{g.data.title}</a></li>)
+            }
+          </ul>
+          <a href={`/guides/#${pillar.id}`} class="link mt-3 inline-block text-sm">All {pillar.short.toLowerCase()} guides →</a>
+        </div>
+      </aside>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="container-x mt-8">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p class="eyebrow">Related guides</p>
+              <h2 class="h2 mt-2">Keep going</h2>
+            </div>
+            <a href="/guides/" class="link">All local SEO guides →</a>
+          </div>
+          <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((g) => (
+              <GuideCard slug={g.id} title={g.data.title} description={g.data.description} pillar={g.data.pillar} updated={g.data.updated} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section class="container-x mt-20">
+      <EmailCapture source={`guide-${guide.id}`} title="New guides and tools, straight to your inbox" />
+    </section>
+  </article>
+</BaseLayout>

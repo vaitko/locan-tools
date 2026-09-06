@@ -1,0 +1,141 @@
+---
+/**
+ * Cookie consent for analytics (GA4 + Hotjar). Nothing loads until the visitor accepts; the choice is stored
+ * for 12 months in localStorage. `gtag()` is always defined so tool scripts can call it safely either way.
+ * A "Cookie settings" link (data-cookie-settings) anywhere on the page re-opens the banner.
+ */
+import { SITE } from '../data/site';
+
+interface Props {
+  enabled: boolean;
+}
+const { enabled } = Astro.props;
+---
+
+{
+  enabled && (
+    <>
+      <div
+        id="cookie-banner"
+        class="fixed inset-x-3 bottom-3 z-[90] mx-auto hidden max-w-3xl rounded-2xl border border-line bg-white p-4 shadow-2xl sm:inset-x-6 sm:p-5"
+        role="dialog"
+        aria-live="polite"
+        aria-label="Cookie consent"
+      >
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-[14.5px] leading-relaxed text-ink/85">
+            We use analytics cookies (Google Analytics, Hotjar, PostHog) to see which free tools and guides help. The tools work
+            either way. <a href="/privacy/" class="link">Privacy policy</a>
+          </p>
+          <div class="flex shrink-0 gap-2">
+            <button type="button" class="btn-secondary btn-sm" data-cookie-decline>Decline</button>
+            <button type="button" class="btn-primary btn-sm" data-cookie-accept>Accept</button>
+          </div>
+        </div>
+      </div>
+
+      <script
+        is:inline
+        define:vars={{ gaId: SITE.gaId, hotjarId: SITE.hotjarId, ph: SITE.posthog }}
+      >
+        (function () {
+          var KEY = 'locan-consent';
+          var TTL = 365 * 24 * 60 * 60 * 1000;
+          window.dataLayer = window.dataLayer || [];
+          // Single tracking entry point: tool scripts call gtag('event', name, props); mirrored to PostHog when loaded.
+          window.gtag =
+            window.gtag ||
+            function () {
+              window.dataLayer.push(arguments);
+              if (arguments[0] === 'event' && window.posthog && window.posthog.__loaded) {
+                window.posthog.capture(arguments[1], arguments[2] || {});
+              }
+            };
+
+          function read() {
+            try {
+              var raw = localStorage.getItem(KEY);
+              if (!raw) return null;
+              var v = JSON.parse(raw);
+              if (!v || !v.at || Date.now() - v.at > TTL) return null;
+              return v.choice;
+            } catch (e) {
+              return null;
+            }
+          }
+          function save(choice) {
+            try {
+              localStorage.setItem(KEY, JSON.stringify({ choice: choice, at: Date.now() }));
+            } catch (e) {}
+          }
+
+          var loaded = false;
+          function loadAnalytics() {
+            if (loaded) return;
+            loaded = true;
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+            document.head.appendChild(s);
+            gtag('js', new Date());
+            gtag('config', gaId, { anonymize_ip: true });
+            (function (h, o, t, j, a, r) {
+              h.hj =
+                h.hj ||
+                function () {
+                  (h.hj.q = h.hj.q || []).push(arguments);
+                };
+              h._hjSettings = { hjid: hotjarId, hjsv: 6 };
+              a = o.getElementsByTagName('head')[0];
+              r = o.createElement('script');
+              r.async = 1;
+              r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+              a.appendChild(r);
+            })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+            loadPostHog();
+          }
+
+          // Official PostHog snippet (loads array.js from the reverse proxy), initialised only after consent.
+          function loadPostHog() {
+            !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="El Rl Pl Al Ll init iu ru Xl tu au fa eu uu Jl cu fu pu capture getExtension nu Ml yu calculateEventProperties mu register register_once register_for_session unregister unregister_for_session ku Yl bu getFeatureFlag getFeatureFlagPayload getFeatureFlagResult getAllFeatureFlags isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync Su identify setPersonProperties unsetPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset xu shutdown setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty vu createPersonProfile setInternalOrTestUser wu Dl $l opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing hu debug pa ns getPageViewId captureTraceFeedback captureTraceMetric Vl".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+            window.posthog.init(ph.token, {
+              api_host: ph.apiHost,
+              ui_host: ph.uiHost,
+              defaults: '2026-05-30',
+              person_profiles: 'identified_only',
+            });
+          }
+
+          var banner = document.getElementById('cookie-banner');
+          function show() {
+            banner.classList.remove('hidden');
+          }
+          function hide() {
+            banner.classList.add('hidden');
+          }
+
+          banner.querySelector('[data-cookie-accept]').addEventListener('click', function () {
+            save('accepted');
+            hide();
+            loadAnalytics();
+          });
+          banner.querySelector('[data-cookie-decline]').addEventListener('click', function () {
+            save('declined');
+            hide();
+          });
+          document.addEventListener('click', function (e) {
+            var t = e.target && e.target.closest ? e.target.closest('[data-cookie-settings]') : null;
+            if (t) {
+              e.preventDefault();
+              show();
+            }
+          });
+
+          var choice = read();
+          if (choice === 'accepted') loadAnalytics();
+          else if (choice === null) show();
+        })();
+      </script>
+    </>
+  )
+}

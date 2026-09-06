@@ -1,0 +1,12 @@
+.aws-sam/
+.venv/
+__pycache__/
+tests/
+.env
+*.md
+samconfig*.toml
+scripts/
+deploy.sh
+edge-template.yaml
+requirements-dev.txt
+pyproject.toml

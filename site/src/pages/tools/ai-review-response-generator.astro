@@ -1,0 +1,182 @@
+---
+import ToolShell from '../../components/ToolShell.astro';
+import Icon from '../../components/Icon.astro';
+import { getTool } from '../../data/tools';
+
+const tool = getTool('ai-review-response-generator');
+
+// Segmented pill: the radio is visually hidden, the label styles itself from :has(:checked).
+const pill =
+  'inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-surface has-checked:border-primary has-checked:bg-primary has-checked:text-white has-checked:hover:bg-primary-hover has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-primary/20';
+
+const tones = [
+  { value: 'professional', label: 'Professional', checked: true },
+  { value: 'friendly', label: 'Friendly', checked: false },
+  { value: 'empathetic', label: 'Empathetic', checked: false },
+  { value: 'concise', label: 'Concise', checked: false },
+];
+const languages = ['English', 'Spanish', 'German', 'French', 'Italian', 'Portuguese', 'Dutch', 'Polish', 'Lithuanian'];
+const stars = [1, 2, 3, 4, 5];
+const guidelines = [
+  'Reply to every review — the positive ones too.',
+  'Respond within 24–48 hours; negative reviews first.',
+  'Never share private details about the customer or their visit.',
+  'Never offer incentives, refunds or discounts publicly.',
+  'Escalate legal, medical or safety complaints offline — keep the public reply short.',
+];
+---
+
+<ToolShell tool={tool}>
+  <Fragment slot="form">
+    <form id="rrForm" class="grid gap-5" data-hj-suppress novalidate>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label class="label" for="rrBusinessName">Business name</label>
+          <input id="rrBusinessName" type="text" class="field" placeholder="e.g. Radiant Plumbing" maxlength="200" autocomplete="organization" required />
+        </div>
+        <div>
+          <label class="label" for="rrBusinessType">Business type <span class="font-normal text-muted">(optional)</span></label>
+          <input id="rrBusinessType" type="text" class="field" placeholder="e.g. plumber, dental clinic" maxlength="80" autocomplete="off" />
+        </div>
+      </div>
+
+      <fieldset>
+        <legend class="label">Star rating the reviewer gave</legend>
+        <div id="rrStars" class="flex flex-wrap items-center gap-1">
+          {
+            stars.map((n) => (
+              <label class="cursor-pointer" title={`${n} star${n === 1 ? '' : 's'}`}>
+                <input type="radio" name="rating" value={n} class="peer sr-only" required />
+                <span class="grid size-10 place-items-center rounded-lg text-line transition-colors hover:bg-surface peer-focus-visible:ring-4 peer-focus-visible:ring-primary/20" data-star>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 3l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.4 6.3 20.5l1.2-6.4L2.8 9.7l6.4-.8z" />
+                  </svg>
+                </span>
+                <span class="sr-only">{n} star{n === 1 ? '' : 's'}</span>
+              </label>
+            ))
+          }
+          <span id="rrRatingLabel" class="ml-2 text-sm font-semibold text-muted">Pick a rating</span>
+        </div>
+      </fieldset>
+
+      <div>
+        <div class="flex items-baseline justify-between gap-3">
+          <label class="label" for="rrReviewText">Review text</label>
+          <span id="rrCount" class="text-xs font-semibold text-muted" aria-live="polite">0 / 2000</span>
+        </div>
+        <textarea id="rrReviewText" class="field" rows="5" minlength="5" maxlength="2000" required placeholder="Paste the customer's review exactly as written…"></textarea>
+      </div>
+
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label class="label" for="rrReviewerName">Reviewer's first name <span class="font-normal text-muted">(optional)</span></label>
+          <input id="rrReviewerName" type="text" class="field" placeholder="e.g. Maria" maxlength="80" autocomplete="off" />
+        </div>
+        <div>
+          <label class="label" for="rrSignOff">Sign-off <span class="font-normal text-muted">(optional)</span></label>
+          <input id="rrSignOff" type="text" class="field" placeholder="— Maria, Owner" maxlength="80" autocomplete="off" />
+          <p class="help">Appended to the end of every reply.</p>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend class="label">Tone</legend>
+        <div class="flex flex-wrap gap-2">
+          {
+            tones.map((t) => (
+              <label class={pill}>
+                <input type="radio" name="tone" value={t.value} class="sr-only" checked={t.checked} />
+                {t.label}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div>
+        <label class="label" for="rrLanguage">Reply language</label>
+        <select id="rrLanguage" class="field">
+          <option value="auto" selected>Same language as the review (auto)</option>
+          {languages.map((l) => <option value={l}>{l}</option>)}
+          <option value="other">Other…</option>
+        </select>
+        <div id="rrLanguageOtherWrap" class="mt-2 hidden">
+          <label class="sr-only" for="rrLanguageOther">Language name</label>
+          <input id="rrLanguageOther" type="text" class="field" placeholder="e.g. Swedish" maxlength="40" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button type="submit" id="rrSubmit" class="btn-primary sm:min-w-56">
+          <span data-label>Generate 3 replies</span>
+          <span class="spinner hidden" data-spinner></span>
+        </button>
+        <p class="text-xs text-muted">Nothing is posted to Google. You copy and paste the reply yourself.</p>
+      </div>
+      <p id="rrError" class="alert-error hidden" role="alert"></p>
+    </form>
+
+    <div class="mt-8 rounded-2xl border border-line bg-surface p-5 sm:p-6">
+      <h2 class="flex items-center gap-2 text-base font-extrabold"><Icon name="shield" size={18} class="text-primary" /> Google review reply guidelines</h2>
+      <ul class="mt-3 space-y-2 text-[14.5px] leading-relaxed text-ink/85">
+        {
+          guidelines.map((g) => (
+            <li class="flex gap-2.5">
+              <Icon name="check" size={16} class="mt-1 shrink-0 text-success" />
+              {g}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Fragment>
+
+  <div slot="results" id="rrResults" class="hidden space-y-6" aria-live="polite">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p class="eyebrow">Your replies</p>
+        <h2 class="mt-1 text-2xl font-extrabold sm:text-3xl">Three ways to reply</h2>
+        <p class="mt-1 text-sm text-muted" id="rrContext"></p>
+      </div>
+      <button type="button" id="rrRegen" class="btn-secondary btn-sm">
+        <span data-label>Regenerate</span>
+        <span class="spinner hidden" data-spinner></span>
+      </button>
+    </div>
+    <p id="rrResultsError" class="alert-error hidden" role="alert"></p>
+
+    <div id="rrCards" class="grid gap-5 lg:grid-cols-3"></div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="card p-6">
+        <h2 class="h3 flex items-center gap-2"><Icon name="bolt" size={20} class="text-primary" /> Tips for this review</h2>
+        <ul id="rrTips" class="mt-4 space-y-2.5 text-[15px] text-ink/85"></ul>
+      </div>
+      <div class="rounded-2xl border border-primary-soft bg-primary-tint p-6">
+        <h2 class="h3 flex items-center gap-2"><Icon name="info" size={20} class="text-primary" /> How to use these</h2>
+        <ul class="mt-4 space-y-2.5 text-[15px] leading-relaxed text-ink/85">
+          <li class="flex gap-2.5"><Icon name="check" size={17} class="mt-1 shrink-0 text-primary" /><span><strong>Edit the facts.</strong> The AI only knows the review. Correct names, dates and details so the reply matches what really happened.</span></li>
+          <li class="flex gap-2.5"><Icon name="check" size={17} class="mt-1 shrink-0 text-primary" /><span><strong>Never argue.</strong> Future customers read your reply, not the reviewer. Stay calm even when the review is unfair.</span></li>
+          <li class="flex gap-2.5"><Icon name="check" size={17} class="mt-1 shrink-0 text-primary" /><span><strong>Take sensitive issues offline.</strong> For legal, medical or safety complaints, keep it short and move the conversation to phone or email.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-5">
+      <p class="text-[15px] text-ink/85"><strong>Next:</strong> post the reply in Google Business Profile, then come back for the next review.</p>
+      <button type="button" id="rrReset" class="btn-secondary btn-sm">Start over</button>
+    </div>
+  </div>
+
+  <div slot="method" class="mt-10 rounded-2xl border border-line bg-surface p-6 text-[15px] leading-relaxed text-ink/85">
+    <h3 class="text-lg font-bold">How the replies are written</h3>
+    <p class="mt-2">
+      The model writes from the review text, the star rating and the details you give it — nothing else. It is instructed never to invent facts, services, names or compensation, to reply in the language the review was written in (unless you choose another), and to return three variants of your chosen tone: a standard reply, a shorter one, and one that ends with a gentle call to action such as booking again or getting in touch. Your sign-off is appended as-is.
+    </p>
+  </div>
+</ToolShell>
+
+<script>
+  import '../../scripts/tools/review-response';
+</script>

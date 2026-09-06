@@ -1,0 +1,256 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Palette: warm ivory page, near-black type/buttons, yellow accent */
+  --color-cream: #f5f3ec;
+  --color-primary: #141413;
+  --color-primary-hover: #2b2a27;
+  --color-primary-tint: #fff4c2;
+  --color-primary-soft: #ffe58a;
+  --color-accent: #ffd84d;
+  --color-accent-strong: #f2c230;
+  --color-navy: #141413; /* dark blocks (name kept for existing markup) */
+  --color-ink: #141413;
+  --color-muted: #5f5e5a;
+  --color-line: #e3dfd3;
+  --color-surface: #ece8dc;
+  --color-success: #1f7a3a;
+  --color-success-tint: #e6f4ea;
+  --color-warning: #b26a00;
+  --color-warning-tint: #fff4dc;
+  --color-danger: #c0392b;
+  --color-danger-tint: #fdecea;
+
+  --shadow-card: 0 1px 2px rgb(20 20 19 / 0.04), 0 8px 24px -14px rgb(20 20 19 / 0.14);
+  --shadow-float: 0 20px 50px -22px rgb(20 20 19 / 0.28);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-cream text-ink font-sans leading-relaxed;
+  }
+  ::selection {
+    background: var(--color-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1200px] px-5 sm:px-8;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold transition-all duration-150 whitespace-nowrap select-none;
+  }
+  .btn-primary {
+    @apply bg-primary text-white;
+  }
+  .btn-primary:hover {
+    @apply bg-primary-hover -translate-y-px;
+  }
+  .btn-primary:disabled {
+    @apply opacity-60 cursor-not-allowed translate-y-0;
+  }
+  .btn-secondary {
+    @apply border border-ink text-ink bg-transparent;
+  }
+  .btn-secondary:hover {
+    @apply bg-primary-tint;
+  }
+  .btn-accent {
+    @apply bg-accent text-ink;
+  }
+  .btn-accent:hover {
+    @apply bg-accent-strong -translate-y-px;
+  }
+  .btn-accent:disabled {
+    @apply opacity-60 cursor-not-allowed translate-y-0;
+  }
+  .btn-ghost {
+    @apply text-ink;
+  }
+  .btn-ghost:hover {
+    @apply bg-surface;
+  }
+  .btn-sm {
+    @apply px-4 py-2 text-sm;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-card;
+  }
+  .card-hover {
+    @apply transition-all duration-200;
+  }
+  .card-hover:hover {
+    @apply -translate-y-0.5 border-ink/50 shadow-float;
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1 text-[13px] font-semibold text-ink;
+  }
+  .tag-primary {
+    @apply border-transparent bg-primary-tint text-ink;
+  }
+  .tag-success {
+    @apply border-transparent bg-success-tint text-success;
+  }
+  .mark {
+    @apply rounded-sm bg-accent px-1 text-ink;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted/70 transition-shadow;
+  }
+  .field:focus {
+    @apply outline-none border-ink ring-4 ring-ink/10;
+  }
+  .label {
+    @apply block text-sm font-semibold text-ink mb-1.5;
+  }
+  .help {
+    @apply text-xs text-muted mt-1.5;
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.14em] text-ink/70;
+  }
+  .h1 {
+    @apply text-[2.4rem] sm:text-5xl lg:text-[3.6rem] font-semibold leading-[1.05] tracking-[-0.03em] text-ink;
+  }
+  .h2 {
+    @apply text-3xl sm:text-[2.4rem] font-semibold leading-[1.1] tracking-[-0.025em] text-ink;
+  }
+  .h3 {
+    @apply text-xl font-semibold text-ink;
+  }
+  .lead {
+    @apply text-lg sm:text-xl text-muted leading-relaxed;
+  }
+
+  .link {
+    @apply text-ink font-semibold underline decoration-ink/30 underline-offset-[3px] hover:decoration-ink;
+  }
+
+  .alert,
+  .alert-error,
+  .alert-info,
+  .alert-warn {
+    @apply rounded-xl border px-4 py-3 text-sm;
+  }
+  .alert-error {
+    @apply border-danger/30 bg-danger-tint text-danger;
+  }
+  .alert-info {
+    @apply border-primary-soft bg-primary-tint text-ink;
+  }
+  .alert-warn {
+    @apply border-warning/30 bg-warning-tint text-ink;
+  }
+
+  .spinner {
+    @apply inline-block size-4 rounded-full border-2 border-current border-r-transparent align-[-2px];
+    animation: spin 0.8s linear infinite;
+  }
+  .score-ring {
+    --pct: 0;
+    background: conic-gradient(var(--color-accent-strong) calc(var(--pct) * 1%), var(--color-line) 0);
+  }
+}
+
+/* Long-form article styling (guides, legal pages) */
+.prose-locan {
+  @apply text-[17px] leading-[1.75] text-ink/90;
+}
+.prose-locan > * + * {
+  margin-top: 1.1em;
+}
+.prose-locan h2 {
+  @apply text-2xl sm:text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-ink mt-12 mb-4 scroll-mt-24;
+}
+.prose-locan h3 {
+  @apply text-xl font-semibold text-ink mt-8 mb-3 scroll-mt-24;
+}
+.prose-locan h4 {
+  @apply text-lg font-semibold text-ink mt-6 mb-2;
+}
+.prose-locan p {
+  @apply text-ink/90;
+}
+.prose-locan a {
+  @apply text-ink font-semibold underline decoration-ink/30 underline-offset-[3px] hover:decoration-ink;
+}
+.prose-locan ul {
+  @apply list-disc pl-6 space-y-2;
+}
+.prose-locan ol {
+  @apply list-decimal pl-6 space-y-2;
+}
+.prose-locan li > ul,
+.prose-locan li > ol {
+  @apply mt-2;
+}
+.prose-locan ul.contains-task-list {
+  @apply list-none pl-0;
+}
+.prose-locan li.task-list-item {
+  @apply flex items-start gap-2.5;
+}
+.prose-locan li.task-list-item input[type="checkbox"] {
+  @apply mt-1.5 size-4 shrink-0 accent-primary;
+}
+.prose-locan strong {
+  @apply font-bold text-ink;
+}
+.prose-locan blockquote {
+  @apply border-l-4 border-accent bg-white pl-5 pr-4 py-3 rounded-r-xl text-ink/80 italic;
+}
+.prose-locan code {
+  @apply rounded bg-surface px-1.5 py-0.5 text-[0.9em] font-mono text-ink;
+}
+.prose-locan pre {
+  @apply overflow-x-auto rounded-xl bg-navy p-4 text-sm text-white;
+}
+.prose-locan pre code {
+  @apply bg-transparent p-0 text-white;
+}
+.prose-locan table {
+  @apply w-full text-[15px] border-collapse my-6;
+}
+.prose-locan th {
+  @apply text-left font-bold border-b-2 border-line px-3 py-2 bg-surface;
+}
+.prose-locan td {
+  @apply border-b border-line px-3 py-2 align-top;
+}
+.prose-locan img {
+  @apply rounded-xl border border-line;
+}
+.prose-locan hr {
+  @apply border-line my-10;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

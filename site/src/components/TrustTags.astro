@@ -1,0 +1,21 @@
+---
+import { TRUST_TAGS } from '../data/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+  compact?: boolean;
+}
+const { class: cls = '', compact = false } = Astro.props;
+---
+
+<ul class:list={['flex flex-wrap gap-2', cls]} aria-label="Free forever guarantees">
+  {
+    TRUST_TAGS.map((t) => (
+      <li class:list={['tag', compact ? 'text-[12px] px-2.5' : 'tag-primary']}>
+        <Icon name="check" size={14} class="text-ink" />
+        {t}
+      </li>
+    ))
+  }
+</ul>

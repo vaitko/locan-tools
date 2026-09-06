@@ -1,0 +1,118 @@
+---
+import ToolShell from '../../components/ToolShell.astro';
+import BusinessSearch from '../../components/BusinessSearch.astro';
+import Icon from '../../components/Icon.astro';
+import { getTool } from '../../data/tools';
+
+const tool = getTool('gbp-category-optimizer');
+---
+
+<ToolShell tool={tool}>
+  <form slot="form" id="catForm" class="grid gap-5" data-hj-suppress novalidate>
+    <BusinessSearch name="biz" label="Your business on Google" placeholder="e.g. Radiant Plumbing Austin" help="Start typing and pick your business from the suggestions so we can read the categories on your profile." />
+    <div>
+      <label class="label" for="catCity">City / service area</label>
+      <input id="catCity" type="text" class="field" placeholder="e.g. Austin, TX" autocomplete="off" required />
+    </div>
+    <div>
+      <label class="label" for="catKeywords">Keywords customers use to find you</label>
+      <textarea id="catKeywords" class="field font-mono text-sm" rows="4" required placeholder="plumber Austin&#10;water heater repair Austin&#10;drain cleaning Austin"></textarea>
+      <p class="help">One per line, 2–10 keywords</p>
+    </div>
+    <div>
+      <label class="label" for="catServices">Services you actually provide (optional — improves scoring)</label>
+      <textarea id="catServices" class="field" rows="3" placeholder="e.g. Water heater installs, drain cleaning, leak repair, repiping…"></textarea>
+    </div>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="sm:w-56">
+        <label class="label" for="catPerKw">Competitors per keyword</label>
+        <select id="catPerKw" class="field">
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+      <button type="submit" id="catSubmit" class="btn-primary sm:min-w-56">
+        <span data-label>Analyze categories</span>
+        <span class="spinner hidden" data-spinner></span>
+      </button>
+    </div>
+    <p class="text-xs text-muted">Read-only. We never change anything on your profile.</p>
+    <p id="catError" class="alert-error hidden" role="alert"></p>
+  </form>
+
+  <div slot="results" id="catResults" class="hidden space-y-6" aria-live="polite">
+    <div class="rounded-2xl border border-success/30 bg-success-tint p-6 sm:p-8">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0">
+          <p class="eyebrow text-success">Opportunity</p>
+          <h2 class="mt-1 text-2xl font-extrabold leading-tight sm:text-3xl" id="catHeadline">Category opportunity</h2>
+          <p class="mt-2 text-sm text-muted">Estimates based on how often the top-ranking competitors use categories you are missing — a direction, not a traffic forecast.</p>
+        </div>
+        <div class="grid shrink-0 grid-cols-3 gap-3 text-center">
+          <div class="rounded-xl border border-line bg-white px-3 py-4">
+            <div class="text-3xl font-extrabold text-success" id="catOppKw">0</div>
+            <div class="mt-1 text-xs font-semibold leading-snug text-muted">Est. keyword matches gained</div>
+          </div>
+          <div class="rounded-xl border border-line bg-white px-3 py-4">
+            <div class="text-3xl font-extrabold text-success" id="catOppSvc">0</div>
+            <div class="mt-1 text-xs font-semibold leading-snug text-muted">Est. service searches gained</div>
+          </div>
+          <div class="rounded-xl border border-line bg-white px-3 py-4">
+            <div class="text-3xl font-extrabold text-success" id="catOppPack">0</div>
+            <div class="mt-1 text-xs font-semibold leading-snug text-muted">Est. local-pack gaps closed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 class="h3 flex items-center gap-2"><Icon name="category" size={20} class="text-primary" /> Your current categories</h2>
+        <p class="text-sm text-muted" id="catClientName"></p>
+      </div>
+      <p class="mt-5 text-xs font-bold uppercase tracking-wider text-muted">Primary</p>
+      <p class="mt-2"><span class="tag tag-primary" id="catPrimary">—</span></p>
+      <p class="mt-5 text-xs font-bold uppercase tracking-wider text-muted">All categories on your profile</p>
+      <div class="mt-2 flex flex-wrap gap-2" id="catAllCats"></div>
+      <p class="mt-4 text-sm text-muted" id="catClientMeta"></p>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <h2 class="h3 flex items-center gap-2"><Icon name="bolt" size={20} class="text-primary" /> Recommended changes</h2>
+      <p class="mt-1 text-sm text-muted">Apply these yourself inside <a class="link" href="https://business.google.com/" target="_blank" rel="noopener nofollow">Google Business Profile</a>. We never change your listing.</p>
+      <ul id="catRecs" class="mt-5 space-y-3"></ul>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <h2 class="h3">What competitors use</h2>
+      <p class="mt-1 text-sm text-muted">Categories observed across the top results for the keywords you entered.</p>
+      <div class="mt-5 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
+              <th class="py-2 pr-4 font-bold" scope="col">Category</th>
+              <th class="py-2 pr-4 font-bold" scope="col">Used by</th>
+              <th class="py-2 font-bold" scope="col">Found via</th>
+            </tr>
+          </thead>
+          <tbody id="catCompetitors"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary-soft bg-primary-tint p-5">
+      <p class="text-[15px] text-ink/85"><strong>Next:</strong> fix the rest of your profile with the <a href="/tools/google-business-profile-optimizer/" class="link">GBP Optimizer</a>, then see where you actually rank with the <a href="/tools/local-rank-checker/" class="link">Local Rank Checker</a>.</p>
+      <button type="button" id="catReset" class="btn-secondary btn-sm">Check another business</button>
+    </div>
+  </div>
+
+  <div slot="method" class="mt-10 rounded-2xl border border-line bg-surface p-6 text-[15px] leading-relaxed text-ink/85">
+    <h3 class="text-lg font-bold">How categories are scored</h3>
+    <p class="mt-2">Every category used by a competitor but missing from your profile gets a 0–100 score: competitor frequency is worth up to 40 points, a match with one of your keywords 20, being listed in your services 20, appearing in your business description 10, and being mentioned in your reviews 10. When there is no evidence you offer the service and only one competitor uses the category, we subtract 25 points. Scores of 60 and above are marked <strong>add</strong>, 35–59 <strong>consider</strong>, and anything lower <strong>avoid</strong>.</p>
+  </div>
+</ToolShell>
+
+<script>
+  import '../../scripts/tools/category-optimizer';
+</script>

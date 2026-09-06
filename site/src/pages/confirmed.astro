@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { TOOLS } from '../data/tools';
+---
+
+<BaseLayout title="Email confirmed | Locan" description="Your email is confirmed — you'll hear about every new free local SEO tool." path="/confirmed/" noindex>
+  <section class="container-x py-20">
+    <div class="card mx-auto max-w-lg p-8 text-center" data-confirmed>
+      <div class="hidden" data-state="ok">
+        <span class="mx-auto grid size-12 place-items-center rounded-full bg-success-tint text-success"><Icon name="check" size={24} /></span>
+        <h1 class="mt-5 text-3xl font-semibold tracking-tight">You're confirmed</h1>
+        <p class="mt-3 text-muted">One short email whenever a new free tool ships or one you used improves. Every email has a one-click unsubscribe link.</p>
+      </div>
+      <div class="hidden" data-state="invalid">
+        <span class="mx-auto grid size-12 place-items-center rounded-full bg-warning-tint text-warning"><Icon name="info" size={24} /></span>
+        <h1 class="mt-5 text-3xl font-semibold tracking-tight">That link didn't work</h1>
+        <p class="mt-3 text-muted">The confirmation link is expired or was changed in transit. Subscribe again from any tool page and use the newest email.</p>
+      </div>
+      <div class="hidden" data-state="none">
+        <h1 class="text-3xl font-semibold tracking-tight">Confirm your email</h1>
+        <p class="mt-3 text-muted">Use the confirmation link in the email we sent you. Nothing is sent until you confirm.</p>
+      </div>
+      <a href="/tools/" class="btn-secondary mt-8">Back to the free tools</a>
+    </div>
+
+    <div class="mx-auto mt-16 max-w-4xl">
+      <p class="eyebrow text-center">While you're here</p>
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {TOOLS.slice(0, 3).map((t) => <ToolCard tool={t} variant="compact" />)}
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const status = new URLSearchParams(location.search).get('status');
+    const key = status === 'ok' ? 'ok' : status === 'invalid' ? 'invalid' : 'none';
+    document.querySelector<HTMLElement>(`[data-confirmed] [data-state="${key}"]`)?.classList.remove('hidden');
+  </script>
+</BaseLayout>

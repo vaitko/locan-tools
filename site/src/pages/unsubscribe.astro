@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<BaseLayout title="Unsubscribed | Locan" description="You have been unsubscribed from Locan's free tool updates." path="/unsubscribe/" noindex>
+  <section class="container-x py-20">
+    <div class="card mx-auto max-w-lg p-8 text-center" data-unsub>
+      <div class="hidden" data-state="ok">
+        <span class="mx-auto grid size-12 place-items-center rounded-full bg-success-tint text-success"><Icon name="check" size={24} /></span>
+        <h1 class="mt-5 font-semibold tracking-tight text-3xl">You're unsubscribed</h1>
+        <p class="mt-3 text-muted">No more emails from us. The free tools stay free and open to you, always.</p>
+      </div>
+      <div class="hidden" data-state="invalid">
+        <span class="mx-auto grid size-12 place-items-center rounded-full bg-warning-tint text-warning"><Icon name="info" size={24} /></span>
+        <h1 class="mt-5 font-semibold tracking-tight text-3xl">That link didn't work</h1>
+        <p class="mt-3 text-muted">The unsubscribe link is expired or was changed in transit. Reply to any of our emails with "unsubscribe" and we remove you by hand within a day.</p>
+      </div>
+      <div class="hidden" data-state="none">
+        <h1 class="font-semibold tracking-tight text-3xl">Unsubscribe</h1>
+        <p class="mt-3 text-muted">Use the one-click link at the bottom of any Locan email. If you cannot find it, reply to the email with "unsubscribe".</p>
+      </div>
+      <a href="/" class="btn-secondary mt-8">Back to the free tools</a>
+    </div>
+  </section>
+
+  <script>
+    const status = new URLSearchParams(location.search).get('status');
+    const key = status === 'ok' ? 'ok' : status === 'invalid' ? 'invalid' : 'none';
+    document.querySelector<HTMLElement>(`[data-unsub] [data-state="${key}"]`)?.classList.remove('hidden');
+  </script>
+</BaseLayout>

@@ -1,0 +1,32 @@
+---
+/**
+ * Server-proxied Google Places autocomplete (no Google Maps JS, no key in the browser).
+ * Usage: <BusinessSearch name="place" label="Your business" />
+ * Read the selection from hidden inputs `<name>_placeId|_name|_address` or the `business:selected` event.
+ */
+interface Props {
+  name?: string;
+  label?: string;
+  placeholder?: string;
+  help?: string;
+  required?: boolean;
+  id?: string;
+}
+const { name = 'place', label = 'Your business', placeholder = 'Start typing your business name…', help, required = true, id } = Astro.props;
+---
+
+<div class="business-search-field">
+  {label && <label class="label" for={id ?? `${name}-input`}>{label}</label>}
+  <business-search name={name} placeholder={placeholder} {...(required ? { required: '' } : {})} data-input-id={id ?? `${name}-input`}></business-search>
+  {help && <p class="help">{help}</p>}
+</div>
+
+<script>
+  import '../scripts/business-search';
+  // Give the inner text input the id referenced by the label.
+  document.querySelectorAll<HTMLElement>('business-search[data-input-id]').forEach((el) => {
+    const apply = () => el.querySelector('input[type=text]')?.setAttribute('id', el.dataset.inputId!);
+    if (el.querySelector('input')) apply();
+    else customElements.whenDefined('business-search').then(() => requestAnimationFrame(apply));
+  });
+</script>

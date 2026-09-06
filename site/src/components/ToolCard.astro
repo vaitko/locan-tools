@@ -1,0 +1,47 @@
+---
+import type { Tool } from '../data/tools';
+import { toolUrl } from '../data/tools';
+import Icon from './Icon.astro';
+
+interface Props {
+  tool: Tool;
+  variant?: 'default' | 'compact';
+}
+const { tool, variant = 'default' } = Astro.props;
+---
+
+{
+  variant === 'compact' ? (
+    <a href={toolUrl(tool.slug)} class="card card-hover flex items-start gap-3 p-4">
+      <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-tint text-primary">
+        <Icon name={tool.icon} size={20} />
+      </span>
+      <span>
+        <span class="block text-[15px] font-bold text-ink">{tool.shortName}</span>
+        <span class="mt-0.5 block text-[13.5px] leading-snug text-muted">{tool.tagline}</span>
+      </span>
+    </a>
+  ) : (
+    <a href={toolUrl(tool.slug)} class="card card-hover group flex h-full flex-col p-6">
+      <div class="mb-4 flex items-center justify-between">
+        <span class="grid size-12 place-items-center rounded-xl bg-primary-tint text-primary">
+          <Icon name={tool.icon} size={24} />
+        </span>
+        <span class="tag tag-success text-[12px]">Free</span>
+      </div>
+      <h3 class="text-lg font-bold text-ink group-hover:text-primary">{tool.name}</h3>
+      <p class="mt-2 flex-1 text-[15px] leading-relaxed text-muted">{tool.tagline}</p>
+      <ul class="mt-4 space-y-1.5">
+        {tool.outputs.slice(0, 3).map((o) => (
+          <li class="flex items-start gap-2 text-[13.5px] text-ink/80">
+            <Icon name="check" size={15} class="mt-0.5 shrink-0 text-success" />
+            {o}
+          </li>
+        ))}
+      </ul>
+      <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-primary">
+        Open tool <Icon name="arrow" size={16} class="transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </a>
+  )
+}

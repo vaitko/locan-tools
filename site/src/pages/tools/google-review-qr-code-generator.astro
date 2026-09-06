@@ -1,0 +1,358 @@
+---
+import ToolShell from '../../components/ToolShell.astro';
+import BusinessSearch from '../../components/BusinessSearch.astro';
+import Icon from '../../components/Icon.astro';
+import { getTool } from '../../data/tools';
+import { hasGuide } from '../../data/guides';
+
+const tool = getTool('google-review-qr-code-generator');
+
+const presets = [
+  { hex: '#3E50F7', name: 'Locan blue' },
+  { hex: '#0F172A', name: 'Black' },
+  { hex: '#0B1437', name: 'Navy' },
+  { hex: '#16A34A', name: 'Green' },
+  { hex: '#DC2626', name: 'Red' },
+];
+
+// Colour swatch radio: input is visually hidden, the label paints itself from the preset and rings when checked.
+const swatch =
+  'grid size-9 cursor-pointer place-items-center rounded-full ring-offset-2 ring-offset-white transition has-checked:ring-2 has-checked:ring-ink has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary';
+// Segmented pill: the radio is visually hidden, the label styles itself from :has(:checked).
+const pill =
+  'inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-surface has-checked:border-primary has-checked:bg-primary has-checked:text-white has-checked:hover:bg-primary-hover has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-primary/20';
+
+const starPath = 'M12 3l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.4 6.3 20.5l1.2-6.4L2.8 9.7l6.4-.8z';
+const policy = [
+  'Never offer discounts, gifts or freebies in exchange for a review — Google removes incentivised reviews and can suspend profiles.',
+  'Ask every customer, not just the happy ones. Filtering who gets asked (“review gating”) is against Google’s policy.',
+  'Do not send customers to a form that decides whether they reach Google. The QR must lead straight to the review box.',
+  'Reply to every review you receive, positive or negative.',
+];
+---
+
+<ToolShell tool={tool}>
+  <Fragment slot="form">
+    <form id="qrForm" class="grid gap-5" data-hj-suppress novalidate>
+      <BusinessSearch
+        name="biz"
+        label="Your business on Google"
+        placeholder="e.g. Radiant Plumbing Austin"
+        help="Start typing and pick your business — the link, QR code and poster appear instantly."
+      />
+      <details class="text-sm">
+        <summary class="cursor-pointer font-semibold text-primary">Or paste a Google Place ID</summary>
+        <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input id="qrPlaceId" type="text" class="field font-mono text-[14px]" placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4" autocomplete="off" spellcheck="false" aria-label="Google Place ID" />
+          <button type="submit" class="btn-secondary sm:shrink-0">Generate</button>
+        </div>
+        <p class="help">
+          Look it up with Google’s <a class="link" href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Place ID finder</a>.
+        </p>
+      </details>
+      <p id="qrError" class="alert-error hidden" role="alert"></p>
+      <p class="text-xs text-muted">Everything is generated in your browser. We store nothing.</p>
+    </form>
+  </Fragment>
+
+  <div slot="results" id="qrResults" class="hidden space-y-6" aria-live="polite">
+    <div class="card p-6 sm:p-8">
+      <p class="eyebrow">Step 1</p>
+      <h2 class="mt-1 text-2xl font-extrabold">Your Google review link</h2>
+      <p class="mt-1 text-sm text-muted">Opens the star-rating box for your profile directly. Open it once to check it lands on the right business.</p>
+      <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+        <label class="sr-only" for="qrLink">Google review link</label>
+        <input id="qrLink" type="url" class="field font-mono text-[13.5px]" readonly />
+        <div class="flex gap-2">
+          <button type="button" class="btn-primary btn-sm shrink-0" data-copy="#qrLink">Copy</button>
+          <a id="qrOpen" class="btn-secondary btn-sm shrink-0" href="#" target="_blank" rel="noopener">Open link</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <p class="eyebrow">Step 2</p>
+      <h2 class="mt-1 text-2xl font-extrabold">QR code</h2>
+      <div class="mt-5 grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
+        <div class="mx-auto rounded-2xl border border-line bg-white p-3">
+          <canvas id="qrCanvas" class="block size-[280px]" role="img" aria-label="QR code for your Google review link"></canvas>
+        </div>
+        <div class="space-y-5">
+          <fieldset>
+            <legend class="label">Colour</legend>
+            <div class="flex flex-wrap gap-2.5">
+              {
+                presets.map((p, i) => (
+                  <label class={swatch} style={`background:${p.hex}`} title={p.name}>
+                    <input type="radio" name="qrColor" value={p.hex} class="sr-only" checked={i === 0} />
+                    <span class="sr-only">{p.name}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <p class="help">Dark modules on a white background scan best. Avoid printing it smaller than 2 cm.</p>
+          </fieldset>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="qrPng" class="btn-primary btn-sm"><Icon name="download" size={16} /> Download PNG</button>
+            <button type="button" id="qrSvg" class="btn-secondary btn-sm"><Icon name="download" size={16} /> Download SVG</button>
+          </div>
+          <p class="text-xs text-muted">PNG is 1024 px — sharp on receipts, stickers and screens. SVG scales to any size for print designers.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <p class="eyebrow">Step 3</p>
+      <h2 class="mt-1 text-2xl font-extrabold">Poster designer</h2>
+      <p class="mt-1 text-sm text-muted">A ready-to-print poster or counter card. Edit the words, pick a colour, download or print.</p>
+      <div class="mt-6 grid gap-8 lg:grid-cols-[1fr_minmax(0,380px)]">
+        <div class="grid gap-5">
+          <div>
+            <label class="label" for="pvHeadlineInput">Headline</label>
+            <input id="pvHeadlineInput" type="text" class="field" maxlength="80" value="Enjoyed your visit? Leave us a Google review!" />
+          </div>
+          <div>
+            <label class="label" for="pvSublineInput">Subline</label>
+            <input id="pvSublineInput" type="text" class="field" maxlength="90" value="Scan the code — it takes 30 seconds" />
+          </div>
+          <div>
+            <label class="label" for="pvNameInput">Business name</label>
+            <input id="pvNameInput" type="text" class="field" maxlength="80" placeholder="Your business name" />
+          </div>
+          <fieldset>
+            <legend class="label">Accent colour</legend>
+            <div class="flex flex-wrap gap-2.5">
+              {
+                presets.map((p, i) => (
+                  <label class={swatch} style={`background:${p.hex}`} title={p.name}>
+                    <input type="radio" name="posterColor" value={p.hex} class="sr-only" checked={i === 0} />
+                    <span class="sr-only">{p.name}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend class="label">Style</legend>
+            <div class="flex flex-wrap gap-2">
+              <label class={pill}><input type="radio" name="posterStyle" value="a4" class="sr-only" checked /> Poster (A4)</label>
+              <label class={pill}><input type="radio" name="posterStyle" value="a6" class="sr-only" /> Counter card (A6)</label>
+            </div>
+            <p class="help">Same layout — the counter card uses bigger type so it reads from across the counter.</p>
+          </fieldset>
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button type="button" id="qrPosterPng" class="btn-primary btn-sm"><Icon name="download" size={16} /> Download poster PNG</button>
+            <button type="button" id="qrPrint" class="btn-secondary btn-sm"><Icon name="print" size={16} /> Print</button>
+          </div>
+        </div>
+
+        <div class="mx-auto w-full max-w-[380px]">
+          <div id="poster" class="poster shadow-card" data-style="a4" style="--accent:#3E50F7">
+            <div class="poster-band">
+              <p class="poster-headline" id="pvHeadline">Enjoyed your visit? Leave us a Google review!</p>
+            </div>
+            <div class="poster-body">
+              <div class="poster-stars" aria-hidden="true">
+                {[1, 2, 3, 4, 5].map(() => <svg viewBox="0 0 24 24" fill="currentColor"><path d={starPath} /></svg>)}
+              </div>
+              <p class="poster-subline" id="pvSubline">Scan the code — it takes 30 seconds</p>
+              <div class="poster-qr"><img id="pvQr" alt="QR code linking to your Google review form" /></div>
+              <p class="poster-name" id="pvName"></p>
+              <p class="poster-foot">Powered by Google reviews</p>
+            </div>
+          </div>
+          <p class="mt-2 text-center text-xs text-muted">Preview — the download is 1240 × 1754 px (A-series ratio).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <p class="eyebrow">Step 4</p>
+      <h2 class="mt-1 text-2xl font-extrabold">Ask for reviews — message templates</h2>
+      <p class="mt-1 text-sm text-muted">Your link is already inside. Replace [Name] and send within a day of the visit, while it is still fresh.</p>
+      <div class="mt-5 grid gap-5 lg:grid-cols-3">
+        <div class="flex flex-col rounded-xl bg-surface p-4">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-[15px] font-bold">SMS</h3>
+            <span id="qrSmsCount" class="text-xs font-semibold text-muted">0 / 160</span>
+          </div>
+          <p id="qrSms" class="mt-3 flex-1 whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-ink/90"></p>
+          <button type="button" class="btn-ghost btn-sm mt-3 self-start border border-line" data-copy="#qrSms">Copy</button>
+        </div>
+        <div class="flex flex-col rounded-xl bg-surface p-4">
+          <h3 class="text-[15px] font-bold">Email</h3>
+          <p class="mt-3 text-[14.5px]"><span class="font-semibold text-muted">Subject:</span> <span id="qrEmailSubject"></span></p>
+          <p id="qrEmailBody" class="mt-2 flex-1 whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-ink/90"></p>
+          <button type="button" id="qrCopyEmail" class="btn-ghost btn-sm mt-3 self-start border border-line">Copy</button>
+        </div>
+        <div class="flex flex-col rounded-xl bg-surface p-4">
+          <h3 class="text-[15px] font-bold">WhatsApp</h3>
+          <p id="qrWhatsapp" class="mt-3 flex-1 whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-ink/90"></p>
+          <button type="button" class="btn-ghost btn-sm mt-3 self-start border border-line" data-copy="#qrWhatsapp">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-warning/30 bg-warning-tint p-6">
+      <h2 class="flex items-center gap-2 text-lg font-extrabold"><Icon name="shield" size={20} class="text-warning" /> Before you ask: Google’s review rules</h2>
+      <ul class="mt-3 space-y-2 text-[14.5px] leading-relaxed text-ink/85">
+        {
+          policy.map((p) => (
+            <li class="flex gap-2.5">
+              <Icon name="check" size={16} class="mt-1 shrink-0 text-warning" />
+              {p}
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-4 text-[14.5px] text-ink/85">
+        {hasGuide('google-review-link-and-qr-code') && <>Read the full playbook in <a href="/guides/google-review-link-and-qr-code/" class="link">Google review link &amp; QR code guide</a>, and </>}Answer the reviews that come in with the <a href="/tools/ai-review-response-generator/" class="link">AI Review Response Generator</a>.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-5">
+      <p class="text-[15px] text-ink/85"><strong>Next:</strong> print the poster, put the QR on receipts and invoices, and send the templates after every job.</p>
+      <button type="button" id="qrReset" class="btn-secondary btn-sm">Start over</button>
+    </div>
+  </div>
+
+  <div slot="method" class="mt-10 rounded-2xl border border-line bg-surface p-6 text-[15px] leading-relaxed text-ink/85">
+    <h3 class="text-lg font-bold">How the link is built</h3>
+    <p class="mt-2">
+      Every Google Business Profile has a place ID. Appending it to <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[13.5px]">search.google.com/local/writereview?placeid=</code> gives the official “write a review” URL that opens the rating dialog for that profile — on desktop, Android and iPhone, with or without the Maps app.
+    </p>
+    <p class="mt-3">
+      Place IDs are stable but not permanent: Google can issue a new one after a profile merge, a re-verification or a major address change. If a printed QR code stops working, come back, search your business again and reprint.
+    </p>
+    <p class="mt-3">
+      The QR code, the poster and the PNG/SVG files are generated locally in your browser with the open-source <em>qrcode</em> library. Only the business search talks to our API; nothing you design here is uploaded or stored.
+    </p>
+  </div>
+</ToolShell>
+
+<style is:global>
+  .poster {
+    --accent: #3e50f7;
+    --hl: 7.6cqw;
+    --sub: 4.1cqw;
+    --star: 6.5cqw;
+    --qr: 46cqw;
+    --name: 5cqw;
+    --foot: 3cqw;
+    container-type: inline-size;
+    aspect-ratio: 1 / 1.414;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    color: #0f172a;
+    border: 1px solid #e6e8f0;
+    border-radius: 14px;
+    text-align: center;
+    font-family: var(--font-sans);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .poster[data-style='a6'] {
+    --hl: 9cqw;
+    --sub: 4.8cqw;
+    --star: 7.5cqw;
+    --qr: 50cqw;
+    --name: 5.6cqw;
+    --foot: 3.4cqw;
+  }
+  .poster-band {
+    display: grid;
+    place-items: center;
+    min-height: 25%;
+    padding: 6cqw 7cqw;
+    background: var(--accent);
+    color: #fff;
+  }
+  .poster-headline {
+    font-size: var(--hl);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+  .poster-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 3cqw 7cqw 4cqw;
+  }
+  .poster-stars {
+    display: flex;
+    gap: 1cqw;
+    color: #f59e0b;
+  }
+  .poster-stars svg {
+    width: var(--star);
+    height: var(--star);
+  }
+  .poster-subline {
+    font-size: var(--sub);
+    font-weight: 600;
+    line-height: 1.3;
+    color: #475569;
+    overflow-wrap: anywhere;
+  }
+  .poster-qr {
+    padding: 2.2cqw;
+    border: 1px solid #e6e8f0;
+    border-radius: 3cqw;
+    background: #fff;
+  }
+  .poster-qr img {
+    display: block;
+    width: var(--qr);
+    height: var(--qr);
+  }
+  .poster-name {
+    font-size: var(--name);
+    font-weight: 800;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .poster-name:empty {
+    display: none;
+  }
+  .poster-foot {
+    font-size: var(--foot);
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  @media screen {
+    #posterPrint {
+      display: none;
+    }
+  }
+  @media print {
+    /* Set by the Print button: everything but the poster clone disappears. */
+    html.print-poster body > *:not(#posterPrint) {
+      display: none !important;
+    }
+    #posterPrint {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    #posterPrint .poster {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: auto;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+</style>
+
+<script>
+  import '../../scripts/tools/review-qr';
+</script>

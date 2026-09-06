@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import ManualTodo from '../components/ManualTodo.astro';
+import { SITE } from '../data/site';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Terms of use', href: '/terms/' },
+];
+const updated = 'September 5, 2026';
+---
+
+<BaseLayout title="Terms of Use | Locan — Free Local SEO Tools" description="Terms of use for Locan's free local SEO tools and guides: free forever, provided as-is, fair daily usage limits, no automated scraping, and what our reports are and are not." path="/terms/" schema={[breadcrumbSchema(crumbs)]}>
+  <section class="container-x py-12 lg:py-16">
+    <Breadcrumbs items={crumbs} />
+    <article class="prose-locan mx-auto mt-8 max-w-3xl">
+      <p class="eyebrow">Legal</p>
+      <h1 class="h1 mt-2">Terms of use</h1>
+      <p class="lead">Last updated: {updated}. Using {SITE.domain} means you accept these terms. They are short because the service is simple.</p>
+
+      <ManualTodo title="Owner TODO — legal review">
+        <ul>
+          <li>Have a lawyer confirm the governing-law clause for your operating entity's jurisdiction and add the legal entity name.</li>
+          <li>If you ever add sponsored placements, affiliate links or a paid tier (the site currently promises none), these terms and the About page must change first.</li>
+        </ul>
+      </ManualTodo>
+
+      <h2>1. What Locan is</h2>
+      <p>
+        Locan provides free local SEO tools and educational guides for local businesses and the people who help them. The tools read publicly available data (primarily from Google's Places API) and, for some features, use AI models to generate suggestions. Everything is provided free of charge, without accounts, and without a paid tier.
+      </p>
+
+      <h2>2. Free forever, provided as-is</h2>
+      <p>
+        We intend the tools to remain free. We may change, pause or retire a tool at any time, for example if a data source changes its terms or pricing. The tools and guides are provided "as is" and "as available", without warranties of any kind, express or implied, including accuracy, fitness for a particular purpose and non-infringement.
+      </p>
+
+      <h2>3. Reports are estimates, not guarantees</h2>
+      <p>
+        Scores, rankings, category recommendations, AI-visibility results and generated texts are estimates produced from public data and models at the moment you run them. In particular: the Local Rank Checker approximates Google Maps positions using Google's Places data with a location bias per grid point and is not identical to what a person sees in Google Maps; the AI Visibility Checker simulates assistant answers with a language model and reports a snapshot, not a measurement of any specific product; AI-generated review replies, descriptions and post ideas are drafts you must read and edit before publishing. You are responsible for decisions you make based on a report.
+      </p>
+
+      <h2>4. Fair use</h2>
+      <p>
+        To keep the tools free for everyone we apply daily limits per visitor. You agree not to circumvent those limits, not to access the tools by automated means (scripts, bots, scrapers, bulk API calls), not to resell or repackage the tools or reports as a paid service, and not to use them to harass a business or to submit false content anywhere. We may block traffic that violates these rules.
+      </p>
+
+      <h2>5. Your inputs and generated content</h2>
+      <p>
+        You retain any rights you have in the text you enter (for example a review you paste). You grant us the limited right to process it to produce your report. Generated outputs (JSON-LD, QR codes, posters, draft replies) are yours to use; we claim no rights in them and make no promise that they are unique. You are responsible for ensuring anything you publish complies with the platform where you publish it, including Google's review and content policies.
+      </p>
+
+      <h2>6. Third-party services and trademarks</h2>
+      <p>
+        Google, Google Maps, Google Business Profile, ChatGPT, Gemini and Perplexity are trademarks of their respective owners. Locan is not affiliated with, endorsed by or sponsored by Google, OpenAI, Replicate, Alphabet or any other company named on this site. Data returned by third-party services is subject to their terms.
+      </p>
+
+      <h2>7. Guides and links</h2>
+      <p>
+        The guides reflect our experience and Google's published documentation at the time of writing. Search products change often; we date every guide and update them, but we cannot guarantee that every menu path or policy is current. Links to external sites are provided for convenience and do not imply endorsement.
+      </p>
+
+      <h2>8. Limitation of liability</h2>
+      <p>
+        To the fullest extent permitted by law, Locan and the people who build it are not liable for any indirect, incidental, special, consequential or punitive damages, or for lost profits, revenue, data or rankings, arising from your use of the tools or guides. Because the service is free, our total liability for any claim is limited to the amount you paid us, which is zero.
+      </p>
+
+      <h2>9. Privacy</h2>
+      <p>How we handle data is described in the <a href="/privacy/">privacy policy</a>, which forms part of these terms.</p>
+
+      <h2>10. Changes and contact</h2>
+      <p>
+        We may update these terms; the date at the top tells you when. Continued use after a change means you accept the new terms. Questions: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
+      </p>
+    </article>
+  </section>
+</BaseLayout>

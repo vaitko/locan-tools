@@ -1,0 +1,37 @@
+---
+interface Props {
+  items: { q: string; a: string }[];
+  title?: string;
+  class?: string;
+}
+const { items, title = 'Frequently asked questions', class: cls = '' } = Astro.props;
+
+export function faqSchema(items: { q: string; a: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+}
+---
+
+<section class:list={['', cls]} aria-labelledby="faq-heading">
+  <h2 id="faq-heading" class="h2 mb-8 text-center">{title}</h2>
+  <div class="mx-auto max-w-3xl divide-y divide-line rounded-2xl border border-line bg-white">
+    {
+      items.map((f) => (
+        <details class="group px-6 py-4 open:bg-surface/60">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-1 text-[16px] font-bold text-ink [&::-webkit-details-marker]:hidden">
+            {f.q}
+            <span class="grid size-7 shrink-0 place-items-center rounded-full border border-line text-muted transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="pb-2 pt-2 text-[15px] leading-relaxed text-muted">{f.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>

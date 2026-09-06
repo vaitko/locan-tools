@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import TrustTags from '../components/TrustTags.astro';
+import RequestToolForm from '../components/RequestToolForm.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import ToolCard from '../components/ToolCard.astro';
+import Faq, { faqSchema } from '../components/Faq.astro';
+import { TOOLS } from '../data/tools';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Request a free tool', href: '/request-a-tool/' },
+];
+
+const faq = [
+  {
+    q: 'Is it really free to have a tool built?',
+    a: 'Yes. Building the tool, hosting it and improving it are free, and the tool stays free for everyone afterwards. There is no invoice, no trial and no premium version waiting behind it.',
+  },
+  {
+    q: 'What kind of tools can I ask for?',
+    a: 'Anything a local business or agency does by hand around Google Business Profile, Google Maps rankings, reviews, citations, schema, landing pages or AI assistants. Checkers, generators, comparisons, bulk versions of existing tools, exports. If it needs data we cannot legally access, we tell you and suggest the closest thing we can build.',
+  },
+  {
+    q: 'How fast is "within 3 days"?',
+    a: 'Most requests are small, focused tools we can design, build, test and publish in one to three working days. Larger requests get a first version in that window and improvements afterwards. If we cannot do it, you hear that within a day, with the reason.',
+  },
+  {
+    q: 'Do I need to create an account?',
+    a: 'No. You leave an email address so we can tell you when the tool is ready. That address also gets one short email whenever any new free tool ships; every email has a one-click unsubscribe link.',
+  },
+  {
+    q: 'Will my request be public?',
+    a: 'The tool will be, because every tool on Locan is public and free. Your name, email and business details are not published. If your request contains something confidential, say so and we will describe the tool generically.',
+  },
+  {
+    q: 'Can I ask for changes after the tool is live?',
+    a: 'Yes, and please do. Reply to the launch email with what the tool got wrong or what is missing. Adjustments are free as well.',
+  },
+];
+
+const schema = [breadcrumbSchema(crumbs), faqSchema(faq)];
+---
+
+<BaseLayout title="Request a Free Local SEO Tool — Built for You Within 3 Days | Locan" description="Describe the local SEO tool you need and we build it for free, usually within 3 days. No account, no card, no commitment — you get an email when it is live, and so does everyone subscribed." path="/request-a-tool/" schema={schema}>
+  <section class="relative overflow-hidden">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <div class="mt-8 grid items-start gap-12 lg:grid-cols-[1fr_1fr]">
+        <div>
+          <TrustTags />
+          <h1 class="h1 mt-6">Ask for the local SEO tool you need. We build it for free.</h1>
+          <p class="mt-6 text-xl leading-relaxed text-ink">
+            <span class="mark">Within 3 days, no commitment.</span> Describe the problem, leave your email, and a local SEO specialist builds the tool and emails you the link when it is live.
+          </p>
+          <p class="lead mt-4">
+            This is how every tool on Locan gets made. Someone needed it, asked, and now it is free for everyone. Yours will be too.
+          </p>
+        </div>
+        <RequestToolForm source="request-page" />
+      </div>
+    </div>
+  </section>
+
+  <HowItWorks class="bg-surface" />
+
+  <section class="container-x py-20">
+    <p class="eyebrow">Already built on request</p>
+    <h2 class="h2 mt-3">The {TOOLS.length} free tools so far</h2>
+    <p class="lead mt-3 max-w-2xl">Check whether one of these already solves your problem — if it almost does, ask for the adjustment instead.</p>
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {TOOLS.map((t) => <ToolCard tool={t} variant="compact" />)}
+    </div>
+  </section>
+
+  <section class="bg-surface py-20">
+    <div class="container-x max-w-3xl">
+      <Faq items={faq} title="Questions about requesting a free tool" />
+    </div>
+  </section>
+</BaseLayout>

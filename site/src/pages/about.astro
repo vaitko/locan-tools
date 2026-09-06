@@ -1,0 +1,203 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import TrustTags from '../components/TrustTags.astro';
+import ManualTodo from '../components/ManualTodo.astro';
+import ToolCard from '../components/ToolCard.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import EmailCapture from '../components/EmailCapture.astro';
+import Icon from '../components/Icon.astro';
+import { TOOLS } from '../data/tools';
+import { SITE } from '../data/site';
+
+const guides = await getCollection('guides', ({ data }) => !data.draft);
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'About Locan', href: '/about/' },
+];
+
+const schema = [
+  breadcrumbSchema(crumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${SITE.url}/about/#about`,
+    url: `${SITE.url}/about/`,
+    name: 'About Locan — free local SEO tools built by SEO specialists',
+    mainEntity: { '@id': `${SITE.url}/#organization` },
+  },
+];
+
+const principles = [
+  {
+    icon: 'gift',
+    title: 'Free forever, no asterisk',
+    text: 'No trial that expires, no "unlock the full report", no premium tier waiting in the wings. The report you see is the report.',
+  },
+  {
+    icon: 'shield',
+    title: 'No card. No account. Never.',
+    text: 'You should not have to hand over an email address and a credit card to look at your own Google Business Profile. So you do not.',
+  },
+  {
+    icon: 'user',
+    title: 'Built by practitioners',
+    text: 'Every check, every scoring rule and every guide comes from years of ranking real local businesses — not from a content farm or a growth team.',
+  },
+  {
+    icon: 'bolt',
+    title: 'Read-only and honest',
+    text: 'We never touch your profile. When a result is an approximation — the rank grid, the AI simulation — the page says so and explains how it was made.',
+  },
+  {
+    icon: 'info',
+    title: 'Explain the why',
+    text: 'Tools tell you what to fix; guides tell you why it matters, what Google actually says, and what we observe in practice. Both are free.',
+  },
+  {
+    icon: 'mail',
+    title: 'No noise',
+    text: 'One short email when a new tool ships, if you ask for it. No drip campaigns, no webinars, no "book a call" buttons.',
+  },
+];
+---
+
+<BaseLayout title="About Locan — Free Local SEO Tools Built by SEO Specialists" description="Locan is a hub of free local SEO tools and guides built by local SEO specialists. Our mission: help local businesses rank in Google and be recommended by AI without spending a dollar." path="/about/" schema={schema}>
+  <section class="relative overflow-hidden">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <div class="mx-auto mt-8 max-w-3xl text-center">
+        <TrustTags class="justify-center" />
+        <h1 class="h1 mt-6">Free local SEO tools, built by people who do local SEO for a living</h1>
+        <p class="lead mt-5">
+          Locan exists because local SEO has too many paid tools and too much noise — and because a local business should be able to see and fix its own visibility in Google and in AI answers without paying anyone for the privilege.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISSION / VISION -->
+  <section class="container-x pb-20">
+    <div class="grid gap-8 lg:grid-cols-2">
+      <div class="card p-8 lg:p-10">
+        <p class="eyebrow">Our mission</p>
+        <h2 class="h2 mt-3">Offer the best free tools and honest guides so local businesses rank better without spending a dollar</h2>
+        <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-ink/85">
+          <p>
+            We have spent many years doing local SEO for real businesses: dentists, plumbers, restaurants, clinics, agencies with dozens of locations. In that time the industry filled up with subscription dashboards that charge monthly for checks you can do in a minute, and with advice that makes a Google Business Profile sound like rocket science.
+          </p>
+          <p>
+            We decided to fix the part we can fix. Every tool on this site does one job well, uses the same public data a customer sees, shows its method, and is free. Every guide is written by a practitioner, says what Google actually documents versus what we observe, and links to the tool that lets you act on it.
+          </p>
+        </div>
+      </div>
+      <div class="card border-primary-soft bg-primary-tint/40 p-8 lg:p-10">
+        <p class="eyebrow">Our vision</p>
+        <h2 class="h2 mt-3">Every local business can see and fix its visibility — in Google Search, Google Maps and AI answers — for free, forever</h2>
+        <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-ink/85">
+          <p>
+            Search no longer ends at the map pack. People ask ChatGPT, Gemini and Perplexity who to call, and those assistants lean on the same signals Google does: a complete profile, real reviews, consistent data, clear categories. A business that can measure both should not need two paid subscriptions to do it.
+          </p>
+          <p>
+            So the hub covers both: tools for Google Search and Maps, tools for AI answers visibility, and guides that connect them. No card, no account, no upsell — not as a launch offer, as the point.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section class="bg-surface py-20">
+    <div class="container-x">
+      <SectionHeading eyebrow="What we promise" title="Six principles every tool and guide has to pass" />
+      <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          principles.map((p) => (
+            <div class="card p-6">
+              <span class="grid size-11 place-items-center rounded-xl bg-primary-tint text-primary">
+                <Icon name={p.icon as any} size={22} />
+              </span>
+              <h3 class="mt-4 text-[17px] font-bold">{p.title}</h3>
+              <p class="mt-1.5 text-[15px] leading-relaxed text-muted">{p.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team" class="container-x scroll-mt-24 py-20">
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+      <div>
+        <p class="eyebrow">Who we are</p>
+        <h2 class="h2 mt-3">A small team of local SEO specialists</h2>
+        <p class="mt-5 text-[17px] leading-relaxed text-ink/85">
+          Locan is built and maintained by a small team of local SEO specialists based in Europe who have ranked local businesses across the US, the UK, Australia and Europe for many years — in-house, at agencies and independently. The tools started as internal scripts we ran for clients; the guides are the explanations we kept writing in emails. We put both online because the questions were always the same and the answers should not cost anything.
+        </p>
+        <p class="mt-4 text-[17px] leading-relaxed text-ink/85">
+          Questions, corrections or a tool you wish existed: <a href={`mailto:${SITE.contactEmail}`} class="link">{SITE.contactEmail}</a> or <a href={SITE.social.x} class="link" rel="noopener" target="_blank">@locan_ai on X</a>.
+        </p>
+        <ManualTodo title="Owner TODO — E-E-A-T">
+          <ul>
+            <li><strong>Replace this section with real people:</strong> name, role, a one-paragraph bio with years in local SEO and the kinds of businesses/markets you have worked in, a real photo (400×400, no stock), and LinkedIn URL for each team member. Add each person as <code>author</code> in guides they own.</li>
+            <li><strong>Company facts:</strong> legal entity name, country of registration and a postal address for the footer/privacy page.</li>
+            <li><strong>Proof:</strong> 2–3 anonymised client outcomes you can stand behind (screenshots of GBP Performance or rank grids, dates, market), and any talks, podcasts or publications.</li>
+            <li><strong>Contact:</strong> confirm <code>hello@locan.ai</code> exists and forwards to you (SES identity for locan.ai is created by the API stack; add an inbound rule or use your mail host).</li>
+          </ul>
+        </ManualTodo>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="card p-6">
+          <p class="eyebrow">Tools</p>
+          <p class="mt-2 text-4xl font-extrabold text-ink">{TOOLS.length}</p>
+          <p class="mt-1 text-[15px] text-muted">Free local SEO tools, each with a published method and limits.</p>
+        </div>
+        <div class="card p-6">
+          <p class="eyebrow">Guides</p>
+          <p class="mt-2 text-4xl font-extrabold text-ink">{guides.length}</p>
+          <p class="mt-1 text-[15px] text-muted">Long-form practitioner guides across five pillars.</p>
+        </div>
+        <div class="card p-6">
+          <p class="eyebrow">Price</p>
+          <p class="mt-2 text-4xl font-extrabold text-ink">$0</p>
+          <p class="mt-1 text-[15px] text-muted">Forever. No trial, no tier, no card field.</p>
+        </div>
+        <div class="card p-6">
+          <p class="eyebrow">Accounts</p>
+          <p class="mt-2 text-4xl font-extrabold text-ink">0</p>
+          <p class="mt-1 text-[15px] text-muted">Nothing to sign up for. Nothing to connect.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW WE FUND -->
+  <section class="bg-surface py-20">
+    <div class="container-x max-w-3xl">
+      <p class="eyebrow">How this is funded</p>
+      <h2 class="h2 mt-3">We don't. That is the point.</h2>
+      <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-ink/85">
+        <p>
+          The tools cost little to run: they read public Google data and use AI models sparingly, and the site is static. We cover that ourselves and keep costs down with fair daily limits per visitor instead of paywalls.
+        </p>
+        <p>
+          There are no ads, no affiliate links to software we would not use, no lead forms feeding an agency sales team, and no data sold. If you want to help, use the tools, tell a business owner who is being upsold, and send us corrections when we get something wrong.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x py-20">
+    <SectionHeading eyebrow="Start here" title="The tools we built" />
+    <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {TOOLS.map((t) => <ToolCard tool={t} variant="compact" />)}
+    </div>
+  </section>
+
+  <div class="container-x pb-20">
+    <EmailCapture source="about" />
+  </div>
+</BaseLayout>

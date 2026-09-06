@@ -1,0 +1,24 @@
+# Secrets & local config
+.env
+.env.*
+!.env.example
+!.env.production
+api/samconfig.toml
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Node / Astro
+node_modules/
+site/dist/
+site/.astro/
+*.log
+
+# Python / SAM
+__pycache__/
+*.pyc
+.venv/
+api/.aws-sam/
+.pytest_cache/

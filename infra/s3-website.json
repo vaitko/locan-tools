@@ -1,0 +1,36 @@
+{
+  "IndexDocument": { "Suffix": "index.html" },
+  "ErrorDocument": { "Key": "404.html" },
+  "RoutingRules": [
+    {
+      "Condition": { "KeyPrefixEquals": "GBP-category-optimizer" },
+      "Redirect": {
+        "HostName": "locan.ai",
+        "Protocol": "https",
+        "HttpRedirectCode": "301",
+        "ReplaceKeyPrefixWith": "tools/gbp-category-optimizer"
+      }
+    },
+    {
+      "Condition": { "KeyPrefixEquals": "examples" },
+      "Redirect": {
+        "HostName": "locan.ai",
+        "Protocol": "https",
+        "HttpRedirectCode": "301",
+        "ReplaceKeyWith": "guides/"
+      }
+    },
+    {
+      "Condition": { "KeyPrefixEquals": "index-new.html" },
+      "Redirect": { "HostName": "locan.ai", "Protocol": "https", "HttpRedirectCode": "301", "ReplaceKeyWith": "" }
+    },
+    {
+      "Condition": { "KeyPrefixEquals": "index.html.bak2" },
+      "Redirect": { "HostName": "locan.ai", "Protocol": "https", "HttpRedirectCode": "301", "ReplaceKeyWith": "" }
+    },
+    {
+      "Condition": { "KeyPrefixEquals": "index.html.old" },
+      "Redirect": { "HostName": "locan.ai", "Protocol": "https", "HttpRedirectCode": "301", "ReplaceKeyWith": "" }
+    }
+  ]
+}

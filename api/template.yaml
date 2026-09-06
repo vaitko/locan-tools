@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Locan API (locan.ai free local SEO tools): FastAPI on Lambda (arm64) behind a Function URL,
+  DynamoDB single table for quotas/subscribers, SES identity for alert e-mails.
+  Custom domain api.locan.ai is created by edge-template.yaml (us-east-1).
+
+Parameters:
+  OpenAiApiKey:
+    Type: String
+    NoEcho: true
+    Default: disabled
+  ReplicateApiToken:
+    Type: String
+    NoEcho: true
+    Default: disabled
+  LlmProvider:
+    Type: String
+    Default: replicate
+    AllowedValues: [replicate, openai]
+  LlmModel:
+    Type: String
+    Default: openai/gpt-5-nano
+  GooglePlacesApiKey:
+    Type: String
+    NoEcho: true
+  OriginVerifySecret:
+    Type: String
+    NoEcho: true
+    Description: Shared secret CloudFront adds as X-Origin-Verify; the app rejects requests without it.
+  AllowedOrigins:
+    Type: String
+    Default: https://locan.ai,https://www.locan.ai
+  AlertEmail:
+    Type: String
+    Default: gintaras@locan.ai
+  AlertFrom:
+    Type: String
+    Default: alerts@locan.ai
+  NotifyEvents:
+    Type: String
+    Default: tool_run,error,quota,subscribe,confirm,unsubscribe,tool_request
+    Description: Comma-separated event kinds that trigger an owner e-mail.
+  HostedZoneId:
+    Type: String
+    Default: Z06912348V2EMPPAR4XO
+    Description: Route 53 hosted zone for locan.ai (used for SES DKIM records).
+  TableName:
+    Type: String
+    Default: locan-api
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    MemorySize: 1024
+    Timeout: 60
+
+Resources:
+  ApiTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  SesIdentity:
+    Type: AWS::SES::EmailIdentity
+    Properties:
+      EmailIdentity: locan.ai
+      DkimAttributes:
+        SigningEnabled: true
+      DkimSigningAttributes:
+        NextSigningKeyLength: RSA_2048_BIT
+
+  SesDkimRecord1:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt SesIdentity.DkimDNSTokenName1
+      Type: CNAME
+      TTL: "1800"
+      ResourceRecords: [!GetAtt SesIdentity.DkimDNSTokenValue1]
+  SesDkimRecord2:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt SesIdentity.DkimDNSTokenName2
+      Type: CNAME
+      TTL: "1800"
+      ResourceRecords: [!GetAtt SesIdentity.DkimDNSTokenValue2]
+  SesDkimRecord3:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt SesIdentity.DkimDNSTokenName3
+      Type: CNAME
+      TTL: "1800"
+      ResourceRecords: [!GetAtt SesIdentity.DkimDNSTokenValue3]
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: locan-api-v2
+      CodeUri: .
+      Handler: lambda_handler.handler
+      ReservedConcurrentExecutions: 10
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: BUFFERED
+      Environment:
+        Variables:
+          APP_ENV: prod
+          OPENAI_API_KEY: !Ref OpenAiApiKey
+          REPLICATE_API_TOKEN: !Ref ReplicateApiToken
+          LLM_PROVIDER: !Ref LlmProvider
+          LLM_MODEL: !Ref LlmModel
+          GOOGLE_PLACES_API_KEY: !Ref GooglePlacesApiKey
+          ORIGIN_VERIFY_SECRET: !Ref OriginVerifySecret
+          ALLOWED_ORIGINS: !Ref AllowedOrigins
+          ALERT_EMAIL: !Ref AlertEmail
+          ALERT_FROM: !Ref AlertFrom
+          NOTIFY_EVENTS: !Ref NotifyEvents
+          SITE_URL: https://locan.ai
+          API_BASE_URL: https://api.locan.ai/api
+          QUOTA_TABLE: !Ref ApiTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ApiTable
+        - Statement:
+            - Effect: Allow
+              Action: [ses:SendEmail, ses:SendRawEmail]
+              Resource: "*"
+    Metadata:
+      BuildMethod: python3.12
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ApiFunction}
+      RetentionInDays: 30
+
+Outputs:
+  FunctionUrl:
+    Value: !GetAtt ApiFunctionUrl.FunctionUrl
+  FunctionUrlHost:
+    Description: Origin host for the CloudFront distribution in edge-template.yaml
+    Value: !Select [2, !Split ["/", !GetAtt ApiFunctionUrl.FunctionUrl]]
+  TableName:
+    Value: !Ref ApiTable

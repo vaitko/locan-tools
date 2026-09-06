@@ -1,0 +1,29 @@
+# Locan — Free Local SEO Tools
+
+> Locan (locan.ai) is a hub of free local SEO tools and practitioner guides for local businesses. Every tool is free forever, needs no account and no credit card. The tools help businesses become visible in Google Search, Google Maps and AI answers (ChatGPT, Gemini, Perplexity, Google AI).
+
+Built by local SEO specialists. Mission: too many paid tools and too much noise around local SEO — we offer the best free tools and honest guides so a local business can rank better without spending a dollar.
+
+## Free tools
+
+- [Google Business Profile Optimizer](https://locan.ai/tools/google-business-profile-optimizer/): audit a Google Business Profile, get a score out of 100 and AI-written fixes (description, post ideas, FAQs, review reply templates).
+- [GBP Category Optimizer](https://locan.ai/tools/gbp-category-optimizer/): compare your Google Business Profile categories with the businesses ranking for your keywords and get a scored add / consider / avoid list.
+- [AI Visibility Checker](https://locan.ai/tools/local-business-ai-visibility-tool/): find out whether ChatGPT, Gemini, Perplexity and Google AI recommend your business for local buyer questions, who they recommend instead, and why.
+- [Local Rank Checker](https://locan.ai/tools/local-rank-checker/): a free grid (heat map) of your Google Maps ranking for a keyword around your business location.
+- [LocalBusiness Schema Markup Generator](https://locan.ai/tools/local-business-schema-generator/): generate valid JSON-LD structured data for any LocalBusiness type, prefilled from your Google profile.
+- [Google Review Link & QR Code Generator](https://locan.ai/tools/google-review-qr-code-generator/): your direct "leave a review" link, a QR code and a printable poster.
+- [AI Review Response Generator](https://locan.ai/tools/ai-review-response-generator/): three professional replies to any Google review in the review's language.
+
+## Guides
+
+- [All local SEO guides](https://locan.ai/guides/)
+- [How to optimize your Google Business Profile](https://locan.ai/guides/how-to-optimize-google-business-profile/)
+- [How to rank on Google Maps](https://locan.ai/guides/how-to-rank-on-google-maps/)
+- [Google reviews: how to get more and respond](https://locan.ai/guides/google-business-profile-reviews/)
+- [LocalBusiness schema markup](https://locan.ai/guides/local-business-schema-markup/)
+- [AI search optimization for local businesses](https://locan.ai/guides/ai-search-optimization-local-business/)
+
+## About
+
+- [Why everything on Locan is free](https://locan.ai/about/)
+- Contact: hello@locan.ai

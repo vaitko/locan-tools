@@ -1,0 +1,206 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TrustTags from '../components/TrustTags.astro';
+import RequestToolForm from '../components/RequestToolForm.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import StatsBand from '../components/StatsBand.astro';
+import ToolCard from '../components/ToolCard.astro';
+import GuideCard from '../components/GuideCard.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Faq, { faqSchema } from '../components/Faq.astro';
+import EmailCapture from '../components/EmailCapture.astro';
+import Icon from '../components/Icon.astro';
+import { TOOLS, toolUrl, guideUrl } from '../data/tools';
+import { PILLARS, PILLAR_ORDER } from '../data/pillars';
+import { hasGuide } from '../data/guides';
+import { SITE } from '../data/site';
+
+const guides = (await getCollection('guides', ({ data }) => !data.draft));
+const guideCount = guides.length;
+const guideBySlug = new Map(guides.map((g) => [g.id, g]));
+const pillarGuides = PILLAR_ORDER.map((id) => ({ pillar: PILLARS[id], guide: guideBySlug.get(PILLARS[id].pillarGuide) })).filter((x) => x.guide);
+
+const faq = [
+  {
+    q: 'How does "ask for a tool" work?',
+    a: 'Describe the local SEO problem or the tool you wish existed and leave your email. Local SEO specialists build it for free — usually within 3 days — and email you the link when it is live. Everyone subscribed to Locan hears about the new tool as well. There is no commitment, no account and nothing to pay, ever.',
+  },
+  {
+    q: 'Are these local SEO tools really free?',
+    a: 'Yes. Every tool on Locan is free forever. There is no trial, no “pro” tier, no credit card field and no account. We limit daily usage per visitor so the tools stay free for everyone.',
+  },
+  {
+    q: 'Why would SEO specialists give away local SEO tools?',
+    a: 'Because the market is full of paid dashboards that hide basic checks behind subscriptions, and full of noise that makes local SEO feel harder than it is. We have done this work for years and would rather give local businesses the tools and honest guidance than sell them another login.',
+  },
+  {
+    q: 'What happens with my email?',
+    a: 'We use it to tell you when the tool you asked for is live and to send one short email when any new free tool ships. Every email has a one-click unsubscribe link. We never sell or share addresses.',
+  },
+  {
+    q: 'What is “AI answers visibility”?',
+    a: 'Whether ChatGPT, Gemini, Perplexity and Google AI name your business when someone asks them for a recommendation in your area. Our AI Visibility Checker measures it; our guides explain how those assistants pick businesses and how to become one of them.',
+  },
+  {
+    q: 'Do I need to give you access to my Google Business Profile?',
+    a: 'No. All tools work from public data. Nothing on your profile is changed — you review the recommendations and apply the ones you agree with.',
+  },
+  {
+    q: 'Which tool should I start with?',
+    a: 'Run the Google Business Profile Optimizer first for a complete audit, then the Local Rank Checker to see where you actually rank, then the AI Visibility Checker. Each report links to the guide that explains the fixes.',
+  },
+];
+
+const schema = [
+  faqSchema(faq),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Free local SEO tools',
+    itemListElement: TOOLS.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.name, url: `${SITE.url}${toolUrl(t.slug)}` })),
+  },
+];
+
+const principles = [
+  { icon: 'gift', title: 'Free forever', text: 'No trials that expire, no “upgrade to see the rest”. The report you get is the whole report.' },
+  { icon: 'shield', title: 'No card. No account. Never.', text: 'You should not have to hand over an email and a card number to look at your own profile.' },
+  { icon: 'user', title: 'Built by practitioners', text: 'Every check and every guide comes from years of ranking local businesses, not from a content farm.' },
+  { icon: 'bolt', title: 'Read-only and honest', text: 'We never touch your Google Business Profile, and we tell you when a result is an approximation.' },
+];
+---
+
+<BaseLayout title="Free Local SEO Tools for Google Search & AI Answers | Locan" description={SITE.description} path="/" schema={schema}>
+  <!-- HERO -->
+  <section class="relative overflow-hidden" id="request-a-tool">
+    <div class="container-x grid items-center gap-12 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
+      <div>
+        <TrustTags />
+        <h1 class="h1 mt-6">Free Local SEO Tools for Google Search and AI Answers Visibility</h1>
+        <p class="mt-6 text-xl leading-relaxed text-ink sm:text-2xl">
+          <span class="mark">Need a tool that doesn't exist yet? Ask for it.</span> We build it for free and email you the link within 3 days. No commitment, no account, nothing to buy.
+        </p>
+        <p class="lead mt-4 max-w-xl">
+          Seven free tools are live today: audit your Google Business Profile, check local rankings street by street, generate schema and review links, and see whether ChatGPT recommends you.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/tools/" class="btn-secondary">Use the {TOOLS.length} free tools <Icon name="arrow" size={18} /></a>
+          <a href="#how-it-works" class="btn-ghost">How the hub works</a>
+        </div>
+        <ul class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
+          <li class="flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> Built by local SEO specialists</li>
+          <li class="flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> Read-only — we never change your profile</li>
+          <li class="flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> Unsubscribe with one click</li>
+        </ul>
+      </div>
+      <RequestToolForm source="home" />
+    </div>
+  </section>
+
+  <HowItWorks class="bg-surface" />
+
+  <StatsBand guideCount={guideCount} />
+
+  <!-- TOOLS -->
+  <section id="tools" class="container-x py-20">
+    <SectionHeading eyebrow="Free local SEO tools" title="Every tool a local business needs to be found" text="Seven focused tools so far — each one built because someone needed it. Every tool does a single job well, explains its method, and links to the guide that shows you what to do next." />
+    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {TOOLS.map((t) => <ToolCard tool={t} />)}
+      <a href="#request-a-tool" class="card card-hover flex h-full flex-col justify-between bg-navy p-6 text-white">
+        <div>
+          <span class="tag border-transparent bg-accent text-ink">Tool #{TOOLS.length + 1}</span>
+          <h3 class="mt-4 font-semibold tracking-tight text-2xl">The one you need next</h3>
+          <p class="mt-2 text-[15px] text-white/75">Missing a check, a generator, a report? Ask for it. We build it for free and email you when it is live — usually within 3 days.</p>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent">Request a free tool <Icon name="arrow" size={16} /></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- MISSION -->
+  <section class="bg-surface py-20">
+    <div class="container-x grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+      <div>
+        <p class="eyebrow">Why everything here is free</p>
+        <h2 class="h2 mt-3">Local SEO has too many paid tools and too much noise. We are fixing that.</h2>
+        <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-ink/85">
+          <p>
+            We have spent many years doing local SEO for real businesses. In that time the industry filled up with subscription dashboards that charge for checks you can do in a minute, and with advice that makes a Google Business Profile sound like rocket science.
+          </p>
+          <p>
+            <strong>Our mission</strong> is to build the best free tools and honest guides so a local business can rank better in Google and be recommended by AI assistants without spending a dollar — and to build the tools people actually ask for, not the ones that sell subscriptions.
+          </p>
+          <p>
+            <strong>Our vision</strong> is simple: every local business should be able to see and fix its own visibility — in Google Search, Google Maps and AI answers — for free, forever.
+          </p>
+        </div>
+        <a href="/about/" class="link mt-6 inline-flex items-center gap-1.5">Read the full story <Icon name="arrow" size={16} /></a>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {
+          principles.map((p) => (
+            <div class="card p-6">
+              <span class="grid size-11 place-items-center rounded-xl bg-primary-tint text-primary">
+                <Icon name={p.icon as any} size={22} />
+              </span>
+              <h3 class="mt-4 text-[17px] font-bold">{p.title}</h3>
+              <p class="mt-1.5 text-[14.5px] leading-relaxed text-muted">{p.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- GOOGLE + AI -->
+  <section class="container-x py-20">
+    <SectionHeading eyebrow="Two places customers look" title="Visible in Google Search — and in AI answers" text="Local search no longer ends at the map pack. People ask ChatGPT, Gemini and Perplexity for recommendations, and those assistants lean on the same signals Google does: a complete profile, real reviews, consistent data and clear categories." />
+    <div class="mt-12 grid gap-6 md:grid-cols-2">
+      <div class="card p-8">
+        <p class="eyebrow">Google Search &amp; Maps</p>
+        <h3 class="mt-2 font-semibold tracking-tight text-3xl">Win the local pack</h3>
+        <ul class="mt-5 space-y-3 text-[15px] text-ink/85">
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('google-business-profile-optimizer')} class="link">Audit your profile</a> for the six essentials Google rewards.</span></li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('gbp-category-optimizer')} class="link">Fix your categories</a> — the strongest relevance signal you control.</span></li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('local-rank-checker')} class="link">Map your rankings</a> street by street with the grid checker.</span></li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('local-business-schema-generator')} class="link">Add LocalBusiness schema</a> so your website confirms who and where you are.</span></li>
+        </ul>
+      </div>
+      <div class="card p-8 bg-primary-tint/60">
+        <p class="eyebrow">ChatGPT, Gemini, Perplexity, Google AI</p>
+        <h3 class="mt-2 font-semibold tracking-tight text-3xl">Become the recommended answer</h3>
+        <ul class="mt-5 space-y-3 text-[15px] text-ink/85">
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('local-business-ai-visibility-tool')} class="link">Check whether AI names you</a> for 12 real buyer questions in your city.</span></li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('google-review-qr-code-generator')} class="link">Collect more reviews</a> — the evidence assistants quote most.</span></li>
+          <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={toolUrl('ai-review-response-generator')} class="link">Reply to every review</a> so your reputation reads as active and trustworthy.</span></li>
+          {hasGuide('how-ai-assistants-recommend-local-businesses') && <li class="flex gap-3"><Icon name="check" size={18} class="mt-0.5 shrink-0 text-ink" /><span><a href={guideUrl('how-ai-assistants-recommend-local-businesses')} class="link">Understand how assistants choose</a> which businesses to mention.</span></li>}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDES BY PILLAR -->
+  <section class="container-x py-20">
+    <SectionHeading eyebrow="Local SEO guides" title="Five pillars, written by people who do this for a living" text="Long-form, practical and free — each pillar guide is backed by a tool you can run while you read." />
+    <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      {
+        pillarGuides.map(({ pillar, guide }) => (
+          <GuideCard slug={guide!.id} title={guide!.data.title} description={pillar.description} pillar={pillar.id} updated={guide!.data.updated} />
+        ))
+      }
+      <a href="/guides/" class="card card-hover flex flex-col items-start justify-center p-6">
+        <span class="eyebrow">All guides</span>
+        <span class="mt-2 font-semibold tracking-tight text-2xl">Browse all {guideCount} guides →</span>
+        <span class="mt-2 text-[14.5px] text-muted">Grouped by pillar, each with the matching free tool.</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="container-x pb-20">
+    <Faq items={faq} title="Questions people ask before trying free local SEO tools" />
+  </section>
+
+  <section class="container-x pb-8">
+    <EmailCapture source="home" />
+  </section>
+</BaseLayout>

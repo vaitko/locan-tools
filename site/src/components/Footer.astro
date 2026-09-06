@@ -1,0 +1,64 @@
+---
+import { TOOLS, toolUrl, guideUrl } from '../data/tools';
+import { PILLARS, PILLAR_ORDER } from '../data/pillars';
+import { SITE, TRUST_TAGS } from '../data/site';
+import { hasGuide } from '../data/guides';
+import Icon from './Icon.astro';
+
+const pillarGuides = PILLAR_ORDER.map((id) => PILLARS[id]).filter((p) => hasGuide(p.pillarGuide));
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-line bg-surface">
+  <div class="container-x py-14">
+    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_0.9fr]">
+      <div>
+        <a href="/" class="inline-flex" aria-label={`${SITE.name} home`}>
+          <img src={SITE.logo} alt={`${SITE.name} — free local SEO tools`} width="120" height="32" class="h-8 w-auto" />
+        </a>
+        <p class="mt-4 max-w-sm text-[15px] text-muted">
+          Free local SEO tools and honest guides for local businesses — built by SEO specialists who think you should not have to pay to see and fix your own visibility in Google and AI answers.
+        </p>
+        <ul class="mt-5 flex flex-wrap gap-2">
+          {TRUST_TAGS.map((t) => <li class="tag"><Icon name="check" size={14} class="text-success" />{t}</li>)}
+        </ul>
+      </div>
+
+      <nav aria-label="Free tools">
+        <h2 class="mb-4 text-sm font-extrabold uppercase tracking-wider text-ink">Free local SEO tools</h2>
+        <ul class="space-y-2.5">
+          {TOOLS.map((t) => <li><a href={toolUrl(t.slug)} class="text-[15px] text-muted hover:text-primary">{t.name}</a></li>)}
+          <li><a href="/tools/" class="text-[15px] font-bold text-primary">All tools →</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Guides">
+        <h2 class="mb-4 text-sm font-extrabold uppercase tracking-wider text-ink">Local SEO guides</h2>
+        <ul class="space-y-2.5">
+          {pillarGuides.map((p) => <li><a href={guideUrl(p.pillarGuide)} class="text-[15px] text-muted hover:text-primary">{p.title}</a></li>)}
+          {hasGuide('local-seo-checklist') && <li><a href="/guides/local-seo-checklist/" class="text-[15px] text-muted hover:text-primary">Local SEO checklist</a></li>}
+          <li><a href="/guides/" class="text-[15px] font-bold text-primary">All guides →</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Company">
+        <h2 class="mb-4 text-sm font-extrabold uppercase tracking-wider text-ink">Locan</h2>
+        <ul class="space-y-2.5">
+          <li><a href="/about/" class="text-[15px] text-muted hover:text-primary">Why everything is free</a></li>
+          <li><a href="/request-a-tool/" class="text-[15px] font-semibold text-ink hover:text-primary">Request a free tool →</a></li>
+          <li><a href="/about/#team" class="text-[15px] text-muted hover:text-primary">Who we are</a></li>
+          <li><a href={`mailto:${SITE.contactEmail}`} class="text-[15px] text-muted hover:text-primary">Contact</a></li>
+          <li><a href="/privacy/" class="text-[15px] text-muted hover:text-primary">Privacy</a></li>
+          <li><a href="/terms/" class="text-[15px] text-muted hover:text-primary">Terms</a></li>
+          <li><a href="/privacy/#cookies" class="text-[15px] text-muted hover:text-primary" data-cookie-settings>Cookie settings</a></li>
+          {SITE.sourceUrl && <li><a href={SITE.sourceUrl} rel="noopener" target="_blank" class="text-[15px] text-muted hover:text-primary">Source code (AGPL) ↗</a></li>}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} {SITE.name}. Free local SEO tools for Google Search and AI answers visibility.</p>
+      <p>Not affiliated with Google. Google Business Profile and Google Maps are trademarks of Google LLC.</p>
+    </div>
+  </div>
+</footer>

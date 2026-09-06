@@ -1,0 +1,32 @@
+---
+import { TOOLS } from '../data/tools';
+
+interface Props {
+  guideCount: number;
+}
+const { guideCount } = Astro.props;
+const stats = [
+  { value: String(TOOLS.length), label: 'free local SEO tools' },
+  { value: String(guideCount), label: 'in-depth guides' },
+  { value: '$0', label: 'forever — no trials, no upsells' },
+  { value: '0', label: 'accounts or cards required' },
+];
+---
+
+<section class="bg-accent text-ink">
+  <div class="container-x grid gap-8 py-10 md:grid-cols-[1.1fr_2fr] md:items-center">
+    <p class="font-semibold tracking-tight text-2xl leading-snug sm:text-3xl">
+      Free local SEO tools for every business that has ever been told to “upgrade to see results”.
+    </p>
+    <dl class="grid grid-cols-2 gap-6 sm:grid-cols-4">
+      {
+        stats.map((s) => (
+          <div class="border-l border-ink/20 pl-4">
+            <dt class="order-2 text-[13px] leading-snug text-ink/70">{s.label}</dt>
+            <dd class="font-semibold tracking-tight text-4xl tracking-tight">{s.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>

@@ -1,0 +1,43 @@
+---
+import { absUrl } from '../data/site';
+
+export interface Crumb {
+  name: string;
+  href: string;
+}
+interface Props {
+  items: Crumb[];
+  class?: string;
+}
+const { items, class: cls = '' } = Astro.props;
+
+export function breadcrumbSchema(items: Crumb[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: absUrl(c.href),
+    })),
+  };
+}
+---
+
+<nav aria-label="Breadcrumb" class:list={['text-sm text-muted', cls]}>
+  <ol class="flex flex-wrap items-center gap-1.5">
+    {
+      items.map((c, i) => (
+        <li class="flex items-center gap-1.5">
+          {i > 0 && <span aria-hidden="true">›</span>}
+          {i === items.length - 1 ? (
+            <span class="font-semibold text-ink" aria-current="page">{c.name}</span>
+          ) : (
+            <a href={c.href} class="hover:text-primary">{c.name}</a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>

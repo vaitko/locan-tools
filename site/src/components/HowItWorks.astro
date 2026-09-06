@@ -1,0 +1,64 @@
+---
+/**
+ * "How this free tools hub works" — the platform explainer used on the homepage and the request page.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+  headingLevel?: 'h2' | 'h3';
+}
+const { class: cls = '' } = Astro.props;
+
+const steps = [
+  {
+    n: '1',
+    title: 'Ask for a tool',
+    text: 'Describe the local SEO problem you have or the tool you wish existed. One sentence is enough. No account, no card, no commitment.',
+  },
+  {
+    n: '2',
+    title: 'We build it — free',
+    text: 'Local SEO specialists design and build it, usually within 3 days. If we need a detail, we reply to your email. If a tool already covers it, we point you to it the same day.',
+  },
+  {
+    n: '3',
+    title: 'You get the link by email',
+    text: 'One short email when your tool is live. Everyone subscribed to Locan hears about it too — that is how the hub grows, one real request at a time.',
+  },
+  {
+    n: '4',
+    title: 'We keep improving it',
+    text: 'Tell us what the report got wrong or what is missing. Adjustments are free as well. Every tool stays free forever and stays read-only on your data.',
+  },
+];
+---
+
+<section class:list={['py-20', cls]} id="how-it-works">
+  <div class="container-x">
+    <div class="max-w-3xl">
+      <p class="eyebrow">How this free tools hub works</p>
+      <h2 class="h2 mt-3">You ask. We build it for free. You get an email when it's ready.</h2>
+      <p class="lead mt-4">
+        Locan is not a software company with a pricing page. It is a workshop: local SEO specialists building the tools local businesses actually ask for, and giving them away.
+      </p>
+    </div>
+    <ol class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      {
+        steps.map((s) => (
+          <li class="card relative p-6">
+            <span class="grid size-11 place-items-center rounded-full bg-accent font-semibold tracking-tight text-2xl text-ink">{s.n}</span>
+            <h3 class="mt-5 text-lg font-semibold">{s.title}</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">{s.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
+      <span class="inline-flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> Free forever</span>
+      <span class="inline-flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> No card required. Never.</span>
+      <span class="inline-flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> No account needed</span>
+      <span class="inline-flex items-center gap-1.5"><Icon name="check" size={16} class="text-ink" /> Unsubscribe from updates with one click</span>
+    </div>
+  </div>
+</section>

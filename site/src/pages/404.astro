@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { TOOLS } from '../data/tools';
+---
+
+<BaseLayout title="Page not found | Locan — Free Local SEO Tools" description="This page does not exist. Browse Locan's free local SEO tools and guides instead." path="/404/" noindex>
+  <section class="container-x py-20 text-center">
+    <p class="eyebrow">404</p>
+    <h1 class="h1 mt-3">That page moved or never existed</h1>
+    <p class="lead mx-auto mt-4 max-w-xl">The free local SEO tools are still here. Pick one below or head back to the tools index.</p>
+    <div class="mt-8 flex justify-center gap-3">
+      <a href="/tools/" class="btn-primary">All free tools</a>
+      <a href="/guides/" class="btn-secondary">Guides</a>
+    </div>
+    <div class="mt-14 grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
+      {TOOLS.slice(0, 6).map((t) => <ToolCard tool={t} variant="compact" />)}
+    </div>
+  </section>
+</BaseLayout>

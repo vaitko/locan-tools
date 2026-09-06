@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import ManualTodo from '../components/ManualTodo.astro';
+import { hasGuide } from '../data/guides';
+import { SITE } from '../data/site';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Privacy policy', href: '/privacy/' },
+];
+const updated = 'September 5, 2026';
+---
+
+<BaseLayout title="Privacy Policy | Locan — Free Local SEO Tools" description="How Locan's free local SEO tools handle the business names, keywords, review texts and email addresses you enter, which third parties process them, and how long anything is kept." path="/privacy/" schema={[breadcrumbSchema(crumbs)]}>
+  <section class="container-x py-12 lg:py-16">
+    <Breadcrumbs items={crumbs} />
+    <article class="prose-locan mx-auto mt-8 max-w-3xl">
+      <p class="eyebrow">Legal</p>
+      <h1 class="h1 mt-2">Privacy policy</h1>
+      <p class="lead">Last updated: {updated}. Plain-language summary first, details below.</p>
+
+      <ManualTodo title="Owner TODO — legal review">
+        <ul>
+          <li>Have this page reviewed by a lawyer for your jurisdiction (GDPR if the operating entity is in the EU; the site serves visitors worldwide). Add the legal entity name, registered address and, if required, a data-protection contact.</li>
+          <li>Cookie consent is implemented (banner; GA4 + Hotjar load only after "Accept"). Confirm the wording meets your legal review.</li>
+          <li>Confirm Replicate's data-handling terms for the API account (Replicate states inputs/outputs of official models are not used for training; verify the retention setting) and update the Replicate paragraph if they differ.</li>
+        </ul>
+      </ManualTodo>
+
+      <h2>The short version</h2>
+      <ul>
+        <li>The tools have no accounts. We do not know who you are unless you email us or subscribe.</li>
+        <li>What you type into a tool (a business name, keywords, a review text) is sent to our API to produce your report and is not stored afterwards. Daily usage counters keyed to a hashed request address expire after two days.</li>
+        <li>To produce reports we send that input to Google's Places API and, for AI features, to Replicate, which runs the language model for us. Neither receives your name or email from us.</li>
+        <li>If you subscribe for new-tool updates we store your email address and the page you subscribed from, and nothing else.</li>
+        <li>We use Google Analytics 4, Hotjar and PostHog to understand how the site is used — only if you accept analytics cookies in the banner. We do not sell data and we do not run ads.</li>
+      </ul>
+
+      <h2>Who we are</h2>
+      <p>
+        Locan ("we") operates {SITE.domain}, a hub of free local SEO tools and guides. Contact: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
+      </p>
+
+      <h2>What we process, and why</h2>
+      <h3>Tool inputs</h3>
+      <p>
+        Each tool takes a small input — a business name or Google place, a keyword, a city, a list of categories or services, a review text and star rating — and returns a report. The input is processed in memory by our API for the duration of the request. We do not store tool inputs or reports, and we do not build profiles of businesses or visitors from them.
+      </p>
+      <p>
+        Two of the tools (the LocalBusiness Schema Generator and the Google Review Link &amp; QR Code Generator) run entirely in your browser except for the optional business lookup; the JSON-LD, QR codes and posters you generate never leave your device.
+      </p>
+      <h3>Usage limits</h3>
+      <p>
+        To keep the tools free we apply daily limits per visitor. To do that we keep a counter keyed to your request's network address (as forwarded by our CDN) and the current date. Counters are deleted automatically after two days. We do not use this data for anything else.
+      </p>
+      <h3>Subscriptions</h3>
+      <p>
+        If you enter your email to be notified about new tools we store the email address, the page you subscribed from and the time. We send a short email when a new tool or major guide ships. Unsubscribe any time by replying to any email or writing to <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>; we delete the record.
+      </p>
+      <h3>Email you send us</h3>
+      <p>We keep correspondence for as long as needed to answer you and for our records.</p>
+
+      <h2>Third parties that process data for us</h2>
+      <ul>
+        <li><strong>Google Places API</strong> (Google LLC) — receives the business name or place you look up, the keyword and the grid coordinates used by the rank checker, in order to return public business data. Governed by Google's terms and privacy policy.</li>
+        <li><strong>Replicate</strong> (Replicate, Inc.) — hosts the language model (currently an OpenAI GPT-5 model) used for AI features and receives the text needed for them: the public profile snapshot for the optimizer's suggestions, the business name, city and category for the AI Visibility Checker, and the review text, rating and business name for the review response generator. Replicate does not use inputs to official models for training.</li>
+        <li><strong>Amazon Web Services</strong> — hosts the site, the API, the counters and the subscriber list (US West region), and sends our alert and subscription emails.</li>
+        <li><strong>Google Analytics 4</strong>, <strong>Hotjar</strong> and <strong>PostHog</strong> (PostHog Inc., US cloud) — usage analytics, anonymised interaction recordings and product analytics on the website, so we can see which tools and guides help and where they break. PostHog requests go through a reverse proxy we operate. Hotjar and PostHog mask typed text in form fields; we additionally mark tool inputs to be excluded.</li>
+      </ul>
+      <p>We do not sell personal data and we do not share it with advertisers.</p>
+
+      <h2 id="cookies">Cookies and similar technologies</h2>
+      <p>
+        The tools themselves set no cookies. Google Analytics, Hotjar and PostHog set cookies to distinguish visitors and sessions, and they load <strong>only after you click "Accept"</strong> in the cookie banner. Your choice is stored in your browser for 12 months; you can change it any time via <a href="#cookies" data-cookie-settings>Cookie settings</a> in the footer. Declining does not affect any tool.
+      </p>
+
+      <h2>Retention</h2>
+      <ul>
+        <li>Tool inputs and reports: not stored.</li>
+        <li>Usage counters: two days.</li>
+        <li>Subscriber emails: until you unsubscribe.</li>
+        <li>Server logs (technical errors, no report content): 30 days.</li>
+        <li>Analytics: per Google Analytics, Hotjar and PostHog retention settings, currently 14 months or less.</li>
+      </ul>
+
+      <h2>Your rights</h2>
+      <p>
+        Depending on where you live you may have rights to access, correct, delete or export personal data we hold about you, and to object to processing. Because we hold so little, the practical answer is usually a single email: write to <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a> and we will confirm what we have (typically nothing, or a subscription record) and delete it on request.
+      </p>
+
+      <h2>Public business data</h2>
+      <p>
+        The reports describe businesses using data Google already publishes (name, address, category, review counts, position in results). If you believe a report about your business shows something that Google should not publish, the fix is in your Google Business Profile, not here — our tools only read what is public.{hasGuide('how-to-optimize-google-business-profile') && <> Our <a href="/guides/how-to-optimize-google-business-profile/">Google Business Profile guide</a> explains how to correct each field.</>}
+      </p>
+
+      <h2>Changes</h2>
+      <p>We will update this page when our processing changes and adjust the date at the top. Material changes to subscriber handling will be announced in the next subscriber email.</p>
+    </article>
+  </section>
+</BaseLayout>

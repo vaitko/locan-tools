@@ -1,0 +1,139 @@
+---
+import ToolShell from '../../components/ToolShell.astro';
+import BusinessSearch from '../../components/BusinessSearch.astro';
+import Icon from '../../components/Icon.astro';
+import { getTool } from '../../data/tools';
+
+const tool = getTool('local-business-ai-visibility-tool');
+---
+
+<ToolShell tool={tool}>
+  <form slot="form" id="visForm" class="grid gap-5" data-hj-suppress novalidate>
+    <BusinessSearch name="biz" label="Your business on Google" placeholder="Type your business name…" help="Start typing and pick your business from the list — we detect your city automatically." />
+    <div>
+      <label class="label" for="visCity">City</label>
+      <input id="visCity" type="text" class="field" placeholder="Filled in when you pick your business" autocomplete="off" required />
+    </div>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <button type="submit" id="visSubmit" class="btn-primary sm:min-w-64">
+        <span data-label>Run free AI visibility check</span>
+        <span class="spinner hidden" data-spinner></span>
+      </button>
+      <p class="text-xs text-muted">Results in about 30 seconds · No account needed · Nothing is stored.</p>
+    </div>
+    <p id="visError" class="alert-error hidden" role="alert"></p>
+  </form>
+
+  <div slot="results">
+    <div id="visLoading" class="card hidden p-6 sm:p-10" aria-live="polite">
+      <div class="mx-auto max-w-md text-center">
+        <span class="spinner size-8 border-[3px] text-primary" aria-hidden="true"></span>
+        <h2 class="mt-5 text-xl font-extrabold" id="visLoadTitle">Analyzing your business…</h2>
+        <p class="mt-1 text-sm text-muted" id="visLoadSub">Simulating AI conversations across 4 engines</p>
+        <ol id="visLoadSteps" class="mt-7 space-y-2.5 text-left text-sm"></ol>
+        <div id="visProgress" class="mt-7 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-label="Analysis progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="visProgressBar" class="h-full rounded-full bg-primary transition-[width] duration-500 ease-out" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="visResults" class="hidden space-y-6" aria-live="polite">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <span class="tag tag-success">Analysis complete</span>
+          <h2 class="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl" id="visTitle">AI Visibility Report</h2>
+          <p class="mt-1 text-sm text-muted" id="visSubline">Based on 12 simulated buyer conversations across 4 AI engines</p>
+        </div>
+        <button type="button" id="visReset" class="btn-secondary btn-sm">Check another business</button>
+      </div>
+
+      <div class="card p-6 sm:p-8">
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div class="score-ring grid size-32 shrink-0 place-items-center rounded-full" id="visRing">
+            <div class="grid size-[104px] place-items-center rounded-full bg-white text-center">
+              <div>
+                <div class="text-4xl font-extrabold leading-none text-ink" id="visScore">–</div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-muted">/100</div>
+              </div>
+            </div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="h3">AI visibility score</h2>
+              <span class="tag" id="visLabel"></span>
+            </div>
+            <p class="mt-2 text-[15px] text-ink/80" id="visScoreDesc"></p>
+            <div class="mt-4 grid grid-cols-3 gap-3 text-center">
+              <div class="rounded-xl bg-surface p-3">
+                <div class="text-xl font-extrabold" id="visMentions">–</div>
+                <div class="text-xs text-muted">Mentions</div>
+              </div>
+              <div class="rounded-xl bg-surface p-3">
+                <div class="text-xl font-extrabold" id="visQueriesCount">–</div>
+                <div class="text-xs text-muted">Answers checked</div>
+              </div>
+              <div class="rounded-xl bg-surface p-3">
+                <div class="text-xl font-extrabold" id="visRate">–</div>
+                <div class="text-xs text-muted">Visibility rate</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-6 sm:p-8">
+        <h2 class="h3 flex items-center gap-2"><Icon name="sparkle" size={20} class="text-primary" /> Engine breakdown</h2>
+        <div id="visEngines" class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4"></div>
+      </div>
+
+      <div class="card p-6 sm:p-8">
+        <h2 class="h3 flex items-center gap-2"><Icon name="info" size={20} class="text-warning" /> Where you were missing</h2>
+        <ul id="visMissing" class="mt-4 space-y-3 text-[15px] text-ink/85"></ul>
+      </div>
+
+      <div class="card p-6 sm:p-8">
+        <h2 class="h3">Competitors AI recommends</h2>
+        <p class="mt-1 text-sm text-muted">The businesses the assistants named instead of you, and why.</p>
+        <div id="visCompetitors" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
+      </div>
+
+      <div class="card p-6 sm:p-8">
+        <h2 class="h3 flex items-center gap-2"><Icon name="bolt" size={20} class="text-primary" /> Action plan</h2>
+        <ol id="visActions" class="mt-4 space-y-3"></ol>
+      </div>
+
+      <div class="card p-6 sm:p-8">
+        <h2 class="h3">Questions we asked</h2>
+        <p class="mt-1 text-sm text-muted">A tick means your business was named in that answer.</p>
+        <ul id="visQueries" class="mt-4 divide-y divide-line"></ul>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="flex items-center gap-3 border-b border-line px-5 py-4">
+          <span class="grid size-9 shrink-0 place-items-center rounded-full bg-primary-tint text-primary"><Icon name="reply" size={18} /></span>
+          <div>
+            <h2 class="text-base font-bold">Ask Locan AI about this report</h2>
+            <p class="text-xs text-muted">Follow-up questions are answered using the results above.</p>
+          </div>
+        </div>
+        <div id="visChatMessages" class="flex max-h-96 flex-col gap-3 overflow-y-auto bg-surface p-4"></div>
+        <div id="visChatQs" class="flex flex-wrap gap-2 border-t border-line px-4 pt-3"></div>
+        <form id="visChatForm" class="flex gap-2 p-4" data-hj-suppress>
+          <label class="sr-only" for="visChatInput">Your question</label>
+          <input id="visChatInput" type="text" class="field min-w-0" placeholder="e.g. Why does my competitor get recommended?" autocomplete="off" maxlength="1000" />
+          <button type="submit" id="visChatSend" class="btn-primary shrink-0 px-5">Send</button>
+        </form>
+        <p id="visChatError" class="alert-error mx-4 mb-4 hidden" role="alert"></p>
+      </div>
+    </div>
+  </div>
+
+  <div slot="method" class="mt-10 rounded-2xl border border-line bg-surface p-6 text-[15px] leading-relaxed text-ink/85">
+    <h3 class="text-lg font-bold">How the engines are simulated</h3>
+    <p class="mt-2">The four assistants are simulations: one underlying model is instructed to answer as ChatGPT, Gemini, Perplexity and Google AI in turn, working through 12 buyer-intent questions for your category and city. Treat the score as a strong directional signal rather than a live crawl of each product, and re-run it monthly — AI answers shift as competitors add reviews and content.</p>
+  </div>
+</ToolShell>
+
+<script>
+  import '../../scripts/tools/ai-visibility';
+</script>

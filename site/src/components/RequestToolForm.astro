@@ -1,0 +1,102 @@
+---
+/**
+ * "Ask for a free tool" form — the platform's main entry point. Posts to /api/tool-requests.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  source?: string;
+  compact?: boolean;
+  class?: string;
+}
+const { source = 'home', compact = false, class: cls = '' } = Astro.props;
+const id = `req-${source}`;
+---
+
+<form class:list={['card grid gap-4 p-6 sm:p-7', cls]} data-tool-request data-source={source} data-hj-suppress novalidate>
+  <div>
+    <p class="eyebrow">Ask for a free tool</p>
+    <h3 class="mt-1.5 font-semibold tracking-tight text-[1.65rem] leading-tight text-ink">What should we build for you?</h3>
+    {!compact && <p class="mt-2 text-[14.5px] leading-relaxed text-muted">Describe the local SEO problem or the tool you wish existed. We build it for free, usually within 3 days, and email you when it is live.</p>}
+  </div>
+
+  <div>
+    <label class="label" for={`${id}-text`}>The tool or problem</label>
+    <textarea id={`${id}-text`} name="request" required minlength="10" maxlength="2000" rows={compact ? 3 : 4} class="field resize-y" placeholder="e.g. Check whether my opening hours match across Google, Apple Maps and Bing — for 12 locations at once."></textarea>
+  </div>
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div>
+      <label class="label" for={`${id}-email`}>Your email</label>
+      <input id={`${id}-email`} type="email" name="email" required autocomplete="email" class="field" placeholder="you@business.com" />
+      <p class="help">So we can tell you when it's ready.</p>
+    </div>
+    <div>
+      <label class="label" for={`${id}-business`}>Business or website <span class="font-normal text-muted">(optional)</span></label>
+      <input id={`${id}-business`} type="text" name="business" maxlength="200" class="field" placeholder="Radiant Plumbing, Austin" />
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-xs leading-relaxed text-muted">Free, no commitment. You'll also get one short email when any new tool ships — unsubscribe any time with one click.</p>
+    <button type="submit" class="btn-primary shrink-0">Request my free tool <Icon name="arrow" size={16} /></button>
+  </div>
+
+  <p class="hidden rounded-xl bg-success-tint px-4 py-3 text-sm font-semibold text-success" data-ok>
+    Got it — a human will read this today. We&#39;ll email you the link when your tool is live, usually within 3 days. Check your inbox now for a confirmation email.
+  </p>
+  <p class="hidden alert-error" data-err></p>
+</form>
+
+<script>
+  import { apiFetch, ApiClientError } from '../scripts/api';
+
+  document.querySelectorAll<HTMLFormElement>('form[data-tool-request]').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = form.querySelector<HTMLTextAreaElement>('textarea[name=request]')!;
+      const email = form.querySelector<HTMLInputElement>('input[name=email]')!;
+      const business = form.querySelector<HTMLInputElement>('input[name=business]')!;
+      const ok = form.querySelector<HTMLElement>('[data-ok]')!;
+      const err = form.querySelector<HTMLElement>('[data-err]')!;
+      const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+      ok.classList.add('hidden');
+      err.classList.add('hidden');
+      if (text.value.trim().length < 10) {
+        err.textContent = 'Tell us a little more about the tool (at least 10 characters).';
+        err.classList.remove('hidden');
+        text.focus();
+        return;
+      }
+      if (!email.checkValidity()) {
+        err.textContent = 'Please enter a valid email so we can tell you when the tool is ready.';
+        err.classList.remove('hidden');
+        email.focus();
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const value = business.value.trim();
+        await apiFetch('/tool-requests', {
+          method: 'POST',
+          body: {
+            email: email.value.trim(),
+            request: text.value.trim(),
+            business: /^https?:\/\//i.test(value) ? undefined : value || undefined,
+            website: /^https?:\/\//i.test(value) ? value : undefined,
+            source: form.dataset.source ?? 'site',
+          },
+        });
+        (window as any).gtag?.('event', 'tool_request', { source: form.dataset.source ?? 'site' });
+        ok.classList.remove('hidden');
+        text.value = '';
+        business.value = '';
+      } catch (ex) {
+        err.textContent = ex instanceof ApiClientError ? ex.message : 'Something went wrong. Please try again.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+</script>

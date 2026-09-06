@@ -1,0 +1,101 @@
+---
+import { TOOLS, toolUrl } from '../data/tools';
+import { SITE } from '../data/site';
+import Icon from './Icon.astro';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<header class="sticky top-0 z-50 border-b border-line bg-cream/90 backdrop-blur supports-[backdrop-filter]:bg-cream/80">
+  <div class="container-x flex h-[68px] items-center justify-between gap-6">
+    <a href="/" class="flex shrink-0 items-center" aria-label={`${SITE.name} home`}>
+      <img src={SITE.logo} alt={`${SITE.name} — free local SEO tools`} width="92" height="25" class="h-[25px] w-auto" />
+    </a>
+
+    <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">
+      <div class="group relative">
+        <a
+          href="/tools/"
+          class:list={['flex items-center gap-1 rounded-full px-4 py-2 text-[15px] font-semibold hover:bg-surface', isActive('/tools/') && 'text-primary']}
+        >
+          Free tools <Icon name="chevron" size={16} class="mt-px opacity-60" />
+        </a>
+        <div class="invisible absolute left-0 top-full pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+          <div class="card w-[560px] p-3 grid grid-cols-2 gap-1">
+            {
+              TOOLS.map((t) => (
+                <a href={toolUrl(t.slug)} class="flex items-start gap-3 rounded-xl p-3 hover:bg-surface">
+                  <span class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary-tint text-primary">
+                    <Icon name={t.icon} size={18} />
+                  </span>
+                  <span>
+                    <span class="block text-[14px] font-bold text-ink">{t.shortName}</span>
+                    <span class="block text-[12.5px] leading-snug text-muted">{t.tagline}</span>
+                  </span>
+                </a>
+              ))
+            }
+            <a href="/tools/" class="col-span-2 mt-1 flex items-center justify-between rounded-xl bg-primary-tint px-4 py-2.5 text-sm font-bold text-primary">
+              All free local SEO tools <Icon name="arrow" size={16} />
+            </a>
+          </div>
+        </div>
+      </div>
+      <a href="/guides/" class:list={['rounded-full px-4 py-2 text-[15px] font-semibold hover:bg-surface', isActive('/guides/') && 'text-primary']}>Guides</a>
+      <a href="/request-a-tool/" class:list={['rounded-full px-4 py-2 text-[15px] font-semibold hover:bg-surface', isActive('/request-a-tool/') && 'underline underline-offset-4']}>Request a tool</a>
+      <a href="/about/" class:list={['rounded-full px-4 py-2 text-[15px] font-semibold hover:bg-surface', isActive('/about/') && 'text-primary']}>Why free?</a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="/tools/" class="btn-primary btn-sm hidden sm:inline-flex">Use the free tools</a>
+      <button
+        type="button"
+        class="grid size-10 place-items-center rounded-full hover:bg-surface lg:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-toggle
+      >
+        <Icon name="menu" size={22} class="[[aria-expanded=true]_&]:hidden" />
+        <Icon name="close" size={22} class="hidden [[aria-expanded=true]_&]:block" />
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden border-t border-line bg-cream lg:hidden" data-mobile-menu>
+    <nav class="container-x py-4" aria-label="Mobile">
+      <p class="eyebrow mb-2">Free tools</p>
+      <ul class="mb-4 grid gap-1">
+        {
+          TOOLS.map((t) => (
+            <li>
+              <a href={toolUrl(t.slug)} class="flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-surface">
+                <span class="grid size-8 place-items-center rounded-lg bg-primary-tint text-primary">
+                  <Icon name={t.icon} size={16} />
+                </span>
+                <span class="text-[15px] font-semibold">{t.shortName}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="grid gap-1 border-t border-line pt-3">
+        <a href="/tools/" class="rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">All tools</a>
+        <a href="/guides/" class="rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">Guides</a>
+        <a href="/about/" class="rounded-xl px-2 py-2.5 text-[15px] font-semibold hover:bg-surface">Why everything is free</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    toggle.setAttribute('aria-label', open ? 'Open menu' : 'Close menu');
+    menu?.classList.toggle('hidden', open);
+  });
+</script>

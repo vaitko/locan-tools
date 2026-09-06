@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../../components/Breadcrumbs.astro';
+import GuideCard from '../../components/GuideCard.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import EmailCapture from '../../components/EmailCapture.astro';
+import Icon from '../../components/Icon.astro';
+import { PILLARS, PILLAR_ORDER } from '../../data/pillars';
+import { TOOL_BY_SLUG, guideUrl } from '../../data/tools';
+import { SITE, absUrl } from '../../data/site';
+
+const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort((a, b) => b.data.updated.getTime() - a.data.updated.getTime());
+const byPillar = PILLAR_ORDER.map((id) => {
+  const p = PILLARS[id];
+  const items = guides.filter((g) => g.data.pillar === id);
+  // pillar guide first
+  items.sort((a, b) => (a.id === p.pillarGuide ? -1 : b.id === p.pillarGuide ? 1 : 0));
+  return { pillar: p, items };
+});
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Local SEO guides', href: '/guides/' },
+];
+const title = `Local SEO Guides — ${guides.length} Practical Guides for Local Businesses | ${SITE.name}`;
+const description = `${guides.length} free local SEO guides on Google Business Profile optimization, local rankings, reviews, schema markup and AI answers visibility — each paired with a free local SEO tool.`;
+const schema = [
+  breadcrumbSchema(crumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Local SEO guides',
+    url: absUrl('/guides/'),
+    description,
+    hasPart: guides.map((g) => ({ '@type': 'Article', headline: g.data.title, url: absUrl(guideUrl(g.id)) })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} path="/guides/" schema={schema}>
+  <section class="border-b border-line bg-surface">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <SectionHeading as="h1" align="left" class="mt-6" eyebrow="Local SEO guides" title="Local SEO guides written by people who do this for a living" text={`${guides.length} free, practical guides organised into five pillars. Every pillar is backed by a free local SEO tool, so you can read the why and run the fix in the same sitting.`} />
+      <nav class="mt-8 flex flex-wrap gap-2" aria-label="Pillars">
+        {PILLAR_ORDER.map((id) => <a href={`#${id}`} class="tag hover:border-primary hover:text-primary">{PILLARS[id].short}</a>)}
+      </nav>
+    </div>
+  </section>
+
+  {
+    byPillar.map(({ pillar, items }, i) => (
+      <section id={pillar.id} class:list={['container-x py-16 scroll-mt-20', i % 2 === 1 && 'border-y border-line bg-surface/60 -mx-0']}>
+        <div class="grid gap-10 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <div>
+            <p class="eyebrow">Pillar {i + 1}</p>
+            <h2 class="h2 mt-2">{pillar.title}</h2>
+            <p class="mt-3 text-[15.5px] leading-relaxed text-muted">{pillar.description}</p>
+            <p class="eyebrow mt-6 mb-3">Free tools for this pillar</p>
+            <div class="grid gap-3">{pillar.tools.map((s) => TOOL_BY_SLUG[s] && <ToolCard tool={TOOL_BY_SLUG[s]} variant="compact" />)}</div>
+          </div>
+          <div class="grid gap-5 sm:grid-cols-2">
+            {items.map((g) => (
+              <GuideCard slug={g.id} title={g.data.title} description={g.data.description} pillar={g.data.pillar} updated={g.data.updated} />
+            ))}
+            {items.length === 0 && <p class="text-muted">Guides for this pillar are being written.</p>}
+          </div>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="container-x py-16">
+    <div class="rounded-3xl border border-primary-soft bg-primary-tint p-8 sm:p-10">
+      <div class="grid items-center gap-6 md:grid-cols-[1fr_auto]">
+        <div>
+          <p class="eyebrow">Prefer doing over reading?</p>
+          <h2 class="h2 mt-2">All seven free local SEO tools in one place</h2>
+          <p class="mt-2 text-[15.5px] text-ink/80">Audit, rank checking, categories, schema, review links, review replies and AI visibility — free forever, no account.</p>
+        </div>
+        <a href="/tools/" class="btn-primary">Browse the tools <Icon name="arrow" size={16} /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x pb-8">
+    <EmailCapture source="guides-index" />
+  </section>
+</BaseLayout>

@@ -1,0 +1,35 @@
+---
+import { guideUrl } from '../data/tools';
+import { PILLARS, type PillarId } from '../data/pillars';
+
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  pillar: PillarId;
+  updated?: Date;
+  variant?: 'default' | 'compact';
+}
+const { slug, title, description, pillar, updated, variant = 'default' } = Astro.props;
+const pillarName = PILLARS[pillar]?.short ?? pillar;
+const dateLabel = updated ? updated.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
+---
+
+{
+  variant === 'compact' ? (
+    <a href={guideUrl(slug)} class="card card-hover block p-4">
+      <span class="eyebrow text-[11px]">{pillarName}</span>
+      <span class="mt-1 block text-[15px] font-bold leading-snug text-ink">{title}</span>
+    </a>
+  ) : (
+    <a href={guideUrl(slug)} class="card card-hover group flex h-full flex-col p-6">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <span class="eyebrow">{pillarName}</span>
+        {dateLabel && <span class="text-xs text-muted">Updated {dateLabel}</span>}
+      </div>
+      <h3 class="text-[17px] font-bold leading-snug text-ink group-hover:text-primary">{title}</h3>
+      <p class="mt-2 flex-1 text-[14.5px] leading-relaxed text-muted">{description}</p>
+      <span class="mt-4 text-sm font-bold text-primary">Read the guide →</span>
+    </a>
+  )
+}
