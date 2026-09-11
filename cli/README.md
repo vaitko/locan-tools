@@ -7,9 +7,9 @@ Both are thin HTTP clients: no Google Places or LLM keys live on your machine. P
 ## Install
 
 ```bash
-uvx --from locan-tools locan find-business "dentist kaunas"   # run without installing
-pipx install locan-tools                               # isolated install
-pip install locan-tools                                # into the current environment
+uvx --from locan-tools locan find-business "Kauno klinikos"   # run without installing
+pipx install locan-tools                                     # isolated install
+pip install locan-tools                                      # into the current environment
 ```
 
 Requires Python 3.11 or newer.
@@ -17,7 +17,7 @@ Requires Python 3.11 or newer.
 ## Commands
 
 ```bash
-locan find-business "dentist kaunas"
+locan find-business "Smile Dental Kaunas"
 locan gbp-audit --business-name "Smile Dental" --city Kaunas
 locan gbp-categories --place-id PLACE_ID --keyword "dentist kaunas" --keyword "teeth whitening"
 locan rank-grid --place-id PLACE_ID --keyword "dentist" --grid-size 5 --spacing-km 1
@@ -29,7 +29,7 @@ locan schema-jsonld PLACE_ID
 
 | Command | What it does |
 |---|---|
-| `find-business` | Looks a business up on Google and prints candidate `placeId`s — start here. |
+| `find-business` | Looks a business up on Google by its name (add the city to disambiguate) and prints candidate `placeId`s — start here. Category searches such as "dentist kaunas" return nothing; use `gbp-categories` or `rank-grid` for keyword research. |
 | `gbp-audit` | Scores a public Google Business Profile and adds AI suggestions. Identify the business with `--place-id`, `--business-name` + `--city`, or `--gbp-url`. |
 | `gbp-categories` | Compares your categories with the competitors ranking for your keywords. Repeat `--keyword` for up to 10 keywords. |
 | `rank-grid` | Google Maps rankings for one keyword across a grid of nearby locations. `--grid-size` 3 or 5, `--spacing-km` 0.5, 1 or 2. |
@@ -41,7 +41,7 @@ locan schema-jsonld PLACE_ID
 Every command prints JSON to stdout. Add `--pretty` before the command name for a compact table instead:
 
 ```bash
-locan --pretty find-business "dentist kaunas"
+locan --pretty find-business "Smile Dental Kaunas"
 ```
 
 API errors are printed to stderr as `error: <message> (<code>)` and exit with status 1.
@@ -52,7 +52,7 @@ API errors are printed to stderr as `error: <message> (<code>)` and exit with st
 
 ```bash
 export LOCAN_API_URL=http://localhost:8080/api
-locan find-business "dentist kaunas"
+locan find-business "Smile Dental Kaunas"
 ```
 
 ## MCP server
