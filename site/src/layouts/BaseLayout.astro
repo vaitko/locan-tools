@@ -81,6 +81,6 @@ const allSchema = [...baseSchema, ...schema];
       <slot />
     </main>
     <Footer />
-    <CookieConsent enabled={isProd} />
+    {!SITE.selfHosted && <CookieConsent enabled={isProd} />}
   </body>
 </html>

@@ -20,6 +20,7 @@ export const SITE = {
   ogImage: '/images/og-default.png',
   apiBase: import.meta.env.PUBLIC_API_BASE ?? 'https://api.locan.ai/api',
   showTodos: import.meta.env.PUBLIC_SHOW_TODOS === 'true',
+  selfHosted: import.meta.env.PUBLIC_SELF_HOSTED === 'true',
 } as const;
 
 export const TRUST_TAGS = [

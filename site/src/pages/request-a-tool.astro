@@ -7,6 +7,7 @@ import HowItWorks from '../components/HowItWorks.astro';
 import ToolCard from '../components/ToolCard.astro';
 import Faq, { faqSchema } from '../components/Faq.astro';
 import { TOOLS } from '../data/tools';
+import { SITE } from '../data/site';
 
 const crumbs = [
   { name: 'Home', href: '/' },
@@ -28,7 +29,9 @@ const faq = [
   },
   {
     q: 'Do I need to create an account?',
-    a: 'No. You leave an email address so we can tell you when the tool is ready. That address also gets one short email whenever any new free tool ships; every email has a one-click unsubscribe link.',
+    a: SITE.selfHosted
+      ? 'No. Open an issue on GitHub describing the tool; every new free tool still gets announced there.'
+      : 'No. You leave an email address so we can tell you when the tool is ready. That address also gets one short email whenever any new free tool ships; every email has a one-click unsubscribe link.',
   },
   {
     q: 'Will my request be public?',
@@ -52,7 +55,11 @@ const schema = [breadcrumbSchema(crumbs), faqSchema(faq)];
           <TrustTags />
           <h1 class="h1 mt-6">Ask for the local SEO tool you need. We build it for free.</h1>
           <p class="mt-6 text-xl leading-relaxed text-ink">
-            <span class="mark">Within 3 days, no commitment.</span> Describe the problem, leave your email, and a local SEO specialist builds the tool and emails you the link when it is live.
+            {SITE.selfHosted ? (
+              <><span class="mark">Within 3 days, no commitment.</span> Open an issue on GitHub describing the problem, and a maintainer builds the tool.</>
+            ) : (
+              <><span class="mark">Within 3 days, no commitment.</span> Describe the problem, leave your email, and a local SEO specialist builds the tool and emails you the link when it is live.</>
+            )}
           </p>
           <p class="lead mt-4">
             This is how every tool on Locan gets made. Someone needed it, asked, and now it is free for everyone. Yours will be too.

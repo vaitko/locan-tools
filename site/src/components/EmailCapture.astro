@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import { SITE } from '../data/site';
 
 interface Props {
   source: string;
@@ -15,26 +16,32 @@ const {
 } = Astro.props;
 ---
 
-<section class:list={['rounded-3xl bg-navy px-6 py-12 text-white sm:px-12', cls]}>
-  <div class="mx-auto grid max-w-4xl items-center gap-8 md:grid-cols-[1.2fr_1fr]">
-    <div>
-      <p class="eyebrow text-accent">Stay in the loop</p>
-      <h2 class="mt-2 font-semibold tracking-tight text-3xl sm:text-4xl">{title}</h2>
-      <p class="mt-3 text-white/75">{text}</p>
-    </div>
-    <form class="grid gap-3" data-subscribe data-source={source} data-hj-suppress novalidate>
-      <label class="sr-only" for={`email-${source}`}>Email address</label>
-      <div class="flex flex-col gap-2 sm:flex-row">
-        <input id={`email-${source}`} type="email" name="email" required autocomplete="email" placeholder="you@business.com" class="field flex-1 text-ink" />
-        <button type="submit" class="btn-accent shrink-0">Notify me <Icon name="mail" size={16} /></button>
-      </div>
-      <p class="text-xs text-white/60">Free, forever. We send one confirmation email first; every email has a one-click unsubscribe link.</p>
-      <p class="hidden text-sm font-semibold text-emerald-300" data-ok>Thanks — you're on the list.</p>
-      <p class="hidden text-sm font-semibold text-rose-300" data-err>Please enter a valid email address.</p>
-    </form>
-  </div>
-</section>
+{
+  !SITE.selfHosted && (
+    <>
+      <section class:list={['rounded-3xl bg-navy px-6 py-12 text-white sm:px-12', cls]}>
+        <div class="mx-auto grid max-w-4xl items-center gap-8 md:grid-cols-[1.2fr_1fr]">
+          <div>
+            <p class="eyebrow text-accent">Stay in the loop</p>
+            <h2 class="mt-2 font-semibold tracking-tight text-3xl sm:text-4xl">{title}</h2>
+            <p class="mt-3 text-white/75">{text}</p>
+          </div>
+          <form class="grid gap-3" data-subscribe data-source={source} data-hj-suppress novalidate>
+            <label class="sr-only" for={`email-${source}`}>Email address</label>
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <input id={`email-${source}`} type="email" name="email" required autocomplete="email" placeholder="you@business.com" class="field flex-1 text-ink" />
+              <button type="submit" class="btn-accent shrink-0">Notify me <Icon name="mail" size={16} /></button>
+            </div>
+            <p class="text-xs text-white/60">Free, forever. We send one confirmation email first; every email has a one-click unsubscribe link.</p>
+            <p class="hidden text-sm font-semibold text-emerald-300" data-ok>Thanks — you're on the list.</p>
+            <p class="hidden text-sm font-semibold text-rose-300" data-err>Please enter a valid email address.</p>
+          </form>
+        </div>
+      </section>
 
-<script>
-  import '../scripts/subscribe';
-</script>
+      <script>
+        import '../scripts/subscribe';
+      </script>
+    </>
+  )
+}

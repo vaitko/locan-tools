@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import httpx
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import Settings
-from .errors import install_error_handlers
-from .quota import DynamoQuotaRepo, MemoryQuotaRepo
+from .errors import ApiError, install_error_handlers
+from .quota import DynamoQuotaRepo, MemoryQuotaRepo, NoQuotaRepo
 from .routers import health, places, subscribe
 from .routers.subscribe import DynamoSubscriberStore, NullStore
 from .services import llm
@@ -19,9 +19,23 @@ from .services.places import PlacesClient
 API_PREFIX = "/api"
 
 
+def _disabled_subscribe_router() -> APIRouter:
+    router = APIRouter()
+
+    async def _disabled() -> None:
+        raise ApiError(404, "disabled", "disabled")
+
+    router.add_api_route("/subscribe", _disabled, methods=["POST"])
+    router.add_api_route("/confirm", _disabled, methods=["GET"])
+    router.add_api_route("/unsubscribe", _disabled, methods=["GET"])
+    router.add_api_route("/tool-requests", _disabled, methods=["POST"])
+    return router
+
+
 def create_app(cfg: Settings | None = None) -> FastAPI:
     cfg = cfg or Settings.from_env()
-    app = FastAPI(title="Locan API", version=health.VERSION, docs_url=None if cfg.is_prod else "/api/docs", redoc_url=None)
+    docs_url = "/api/docs" if cfg.self_hosted else (None if cfg.is_prod else "/api/docs")
+    app = FastAPI(title="Locan API", version=health.VERSION, docs_url=docs_url, redoc_url=None)
     app.state.settings = cfg
 
     http = httpx.AsyncClient(timeout=httpx.Timeout(cfg.upstream_timeout_s))
@@ -29,15 +43,21 @@ def create_app(cfg: Settings | None = None) -> FastAPI:
     app.state.places = PlacesClient(cfg.google_places_api_key, http)
     llm.configure(cfg, http)
 
-    if cfg.quota_table:
-        app.state.quota = DynamoQuotaRepo(cfg.quota_table, cfg.aws_region)
-        app.state.subscribers = DynamoSubscriberStore(cfg.quota_table, cfg.aws_region)
-        mailer = SesMailer(cfg.aws_region, cfg.alert_from) if cfg.alert_from else NullMailer()
-    else:
-        app.state.quota = MemoryQuotaRepo()
+    if cfg.self_hosted:
+        app.state.quota = NoQuotaRepo()
         app.state.subscribers = NullStore()
         mailer = NullMailer()
-    app.state.notifier = Notifier(mailer, cfg.alert_email, cfg.site_url, set(cfg.notify_events))
+        app.state.notifier = Notifier(mailer, cfg.alert_email, cfg.site_url, set())
+    else:
+        if cfg.quota_table:
+            app.state.quota = DynamoQuotaRepo(cfg.quota_table, cfg.aws_region)
+            app.state.subscribers = DynamoSubscriberStore(cfg.quota_table, cfg.aws_region)
+            mailer = SesMailer(cfg.aws_region, cfg.alert_from) if cfg.alert_from else NullMailer()
+        else:
+            app.state.quota = MemoryQuotaRepo()
+            app.state.subscribers = NullStore()
+            mailer = NullMailer()
+        app.state.notifier = Notifier(mailer, cfg.alert_email, cfg.site_url, set(cfg.notify_events))
 
     app.add_middleware(
         CORSMiddleware,
@@ -48,7 +68,7 @@ def create_app(cfg: Settings | None = None) -> FastAPI:
     )
 
     # Only enforced in prod so a local .env that also holds the secret (deploy.sh writes it) doesn't block dev.
-    if cfg.origin_verify_secret and cfg.is_prod:
+    if cfg.origin_verify_secret and cfg.is_prod and not cfg.self_hosted:
         secret = cfg.origin_verify_secret
 
         @app.middleware("http")
@@ -61,7 +81,10 @@ def create_app(cfg: Settings | None = None) -> FastAPI:
 
     app.include_router(health.router, prefix=API_PREFIX)
     app.include_router(places.router, prefix=API_PREFIX)
-    app.include_router(subscribe.router, prefix=API_PREFIX)
+    if cfg.self_hosted:
+        app.include_router(_disabled_subscribe_router(), prefix=API_PREFIX, include_in_schema=False)
+    else:
+        app.include_router(subscribe.router, prefix=API_PREFIX)
     _include_tool_routers(app)
 
     @app.on_event("shutdown")

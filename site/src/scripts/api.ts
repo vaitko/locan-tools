@@ -8,7 +8,7 @@ export class ApiClientError extends Error {
   }
 }
 
-const BASE = (import.meta.env.PUBLIC_API_BASE as string | undefined)?.replace(/\/$/, '') ?? 'https://api.locan.ai/api';
+const BASE = (import.meta.env.PUBLIC_API_BASE as string | undefined)?.replace(/\/$/, '') ?? '/api';
 
 export const API_BASE = BASE;
 

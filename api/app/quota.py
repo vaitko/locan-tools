@@ -27,6 +27,11 @@ class MemoryQuotaRepo:
         return self._counts[key]
 
 
+class NoQuotaRepo:
+    async def incr(self, key: str, ttl_days: int = 2) -> int:
+        return 0
+
+
 class DynamoQuotaRepo:
     """Atomic ADD counter on a single-table DynamoDB (PK string, ttl number)."""
 

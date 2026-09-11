@@ -1,0 +1,139 @@
+{
+  "name": "Locan GBP Audit",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3f6a1e1a-2b1e-4c9a-9d1a-6e2f0a9c1a01",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c01",
+              "name": "businessName",
+              "value": "Example Dental",
+              "type": "string"
+            },
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c02",
+              "name": "city",
+              "value": "Austin",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3f6a1e1a-2b1e-4c9a-9d1a-6e2f0a9c1a02",
+      "name": "Business Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.locan.ai/api/tools/gbp-optimizer",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ businessName: $json.businessName, city: $json.city }) }}",
+        "options": {}
+      },
+      "id": "3f6a1e1a-2b1e-4c9a-9d1a-6e2f0a9c1a03",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c03",
+              "name": "score",
+              "value": "={{ $json.score }}",
+              "type": "number"
+            },
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c04",
+              "name": "grade",
+              "value": "={{ $json.grade }}",
+              "type": "string"
+            },
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c05",
+              "name": "summary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c06",
+              "name": "recommendations",
+              "value": "={{ $json.recommendations.join('\\n') }}",
+              "type": "string"
+            },
+            {
+              "id": "8b1a2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c07",
+              "name": "optimizedDescription",
+              "value": "={{ $json.ai.optimizedDescription }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3f6a1e1a-2b1e-4c9a-9d1a-6e2f0a9c1a04",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "reports@example.com",
+        "toEmail": "you@example.com",
+        "subject": "=GBP audit for {{ $('Business Input').item.json.businessName }}: {{ $json.grade }} ({{ $json.score }}/100)",
+        "text": "={{ $json.summary }}\n\nRecommendations:\n{{ $json.recommendations }}",
+        "options": {}
+      },
+      "id": "3f6a1e1a-2b1e-4c9a-9d1a-6e2f0a9c1a05",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Business Input", "type": "main", "index": 0 }]
+      ]
+    },
+    "Business Input": {
+      "main": [
+        [{ "node": "HTTP Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [{ "node": "Edit Fields", "type": "main", "index": 0 }]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [{ "node": "Send Email", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

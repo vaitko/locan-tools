@@ -4,6 +4,58 @@ Source code of the tools behind **[locan.ai](https://locan.ai)**: a hub of free 
 businesses — no account, no card, free forever. If a tool you need doesn't exist, you ask for it on the
 homepage and we build it, free, usually within 3 days.
 
+## Self-host in 3 commands
+
+```bash
+git clone https://github.com/vaitko/locan-tools.git && cd locan-tools
+cp .env.example .env                 # fill in GOOGLE_PLACES_API_KEY
+docker compose up --build
+```
+
+The site is then on `http://localhost:8080`, with the API behind `/api`.
+
+| Tool | Needs Places key | Needs LLM | Browser only |
+|---|---|---|---|
+| Google Business Profile Optimizer | ✅ | ✅ | |
+| GBP Category Optimizer | ✅ | | |
+| Local Rank Checker | ✅ | | |
+| AI Visibility Checker | | ✅ | |
+| AI Review Response Generator | | ✅ | |
+| LocalBusiness Schema Generator | | | ✅ |
+| Google Review Link & QR Poster | | | ✅ |
+
+The Local Rank Checker runs one Places text search per grid cell: 9 calls for a 3×3 grid, 25 for a 5×5
+grid.
+
+**Why self-host:** unlimited runs (the hosted API has daily limits), client names never leave your server,
+and you choose your own LLM (Replicate, OpenAI, or an OpenAI-compatible endpoint like Ollama or LM Studio).
+`LLM_MODEL` must name a model the chosen provider accepts: `openai/gpt-5-nano` on Replicate (the default),
+`gpt-4o-mini` with `LLM_PROVIDER=openai` and an OpenAI key, or the local tag (e.g. `llama3.1`) with Ollama.
+
+The stack is the same code as locan.ai with `SELF_HOSTED=true` / `PUBLIC_SELF_HOSTED=true`: no database, no auth — put it behind your own reverse proxy if you expose it beyond localhost.
+
+## Use it from an agent
+
+The PyPI package **`locan-tools`** (Python ≥ 3.11) ships `locan` (a CLI) and `locan-mcp` (an MCP server,
+stdio by default; `locan-mcp --http --port 8765` for streamable HTTP). Both are thin HTTP clients over the
+API. `LOCAN_API_URL` defaults to `https://api.locan.ai/api` (the hosted API, which has daily limits);
+self-hosters point it at their instance, e.g. `http://localhost:8080/api`. Install with
+`uvx --from locan-tools locan …` or `pipx install locan-tools`.
+
+```bash
+claude mcp add locan -- uvx --from locan-tools locan-mcp
+```
+
+See [`cli/README.md`](cli/README.md) for the full command/tool list (`find-business`, `gbp-audit`,
+`gbp-categories`, `rank-grid`, `ai-visibility`, `review-reply`, `review-link`, `schema-jsonld`), and
+[`skills/locan-local-seo/SKILL.md`](skills/locan-local-seo/SKILL.md) for a ready-made audit procedure for
+agents that support skills.
+
+Site pages with more detail: [Run Locan from an agent](https://locan.ai/mcp/),
+[self-hosting](https://locan.ai/self-host/) and [running it from n8n](https://locan.ai/n8n/).
+
+## The tools
+
 | Tool | What it does |
 |---|---|
 | Google Business Profile Optimizer | Scores the public profile (website, hours, phone, photos, reviews, category) and drafts descriptions, posts, FAQs and review replies with an LLM |
@@ -36,7 +88,7 @@ The rank grid is the expensive tool (one Places text search per cell), which is 
 # API
 cd api
 python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
-cp .env.example .env                 # GOOGLE_PLACES_API_KEY, REPLICATE_API_TOKEN (or OPENAI_API_KEY + LLM_PROVIDER=openai)
+cp .env.example .env                 # GOOGLE_PLACES_API_KEY, REPLICATE_API_TOKEN (or OPENAI_API_KEY + LLM_PROVIDER=openai + LLM_MODEL=gpt-4o-mini)
 set -a; source .env; set +a
 .venv/bin/uvicorn app.main:app --port 8000 --reload
 .venv/bin/pytest -q                  # no network needed

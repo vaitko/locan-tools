@@ -34,8 +34,21 @@ const updated = 'September 5, 2026';
         <li>What you type into a tool (a business name, keywords, a review text) is sent to our API to produce your report and is not stored afterwards. Daily usage counters keyed to a hashed request address expire after two days.</li>
         <li>To produce reports we send that input to Google's Places API and, for AI features, to Replicate, which runs the language model for us. Neither receives your name or email from us.</li>
         <li>If you subscribe for new-tool updates we store your email address and the page you subscribed from, and nothing else.</li>
-        <li>We use Google Analytics 4, Hotjar and PostHog to understand how the site is used — only if you accept analytics cookies in the banner. We do not sell data and we do not run ads.</li>
+        {SITE.selfHosted ? (
+          <li>This instance runs no analytics, sets no cookies and stores no tool inputs.</li>
+        ) : (
+          <li>We use Google Analytics 4, Hotjar and PostHog to understand how the site is used — only if you accept analytics cookies in the banner. We do not sell data and we do not run ads.</li>
+        )}
       </ul>
+
+      {SITE.selfHosted && (
+        <>
+          <h2>This is a self-hosted instance</h2>
+          <p>
+            This copy of Locan runs on infrastructure operated by whoever deployed it, not by Locan. It runs no analytics, sets no cookies and stores no tool inputs. The operator of this instance is responsible for its privacy terms, for the API keys it uses and for anything their own hosting layer (reverse proxy, server logs) records. The sections below describe how the software itself handles data.
+          </p>
+        </>
+      )}
 
       <h2>Who we are</h2>
       <p>
@@ -66,14 +79,22 @@ const updated = 'September 5, 2026';
         <li><strong>Google Places API</strong> (Google LLC) — receives the business name or place you look up, the keyword and the grid coordinates used by the rank checker, in order to return public business data. Governed by Google's terms and privacy policy.</li>
         <li><strong>Replicate</strong> (Replicate, Inc.) — hosts the language model (currently an OpenAI GPT-5 model) used for AI features and receives the text needed for them: the public profile snapshot for the optimizer's suggestions, the business name, city and category for the AI Visibility Checker, and the review text, rating and business name for the review response generator. Replicate does not use inputs to official models for training.</li>
         <li><strong>Amazon Web Services</strong> — hosts the site, the API, the counters and the subscriber list (US West region), and sends our alert and subscription emails.</li>
-        <li><strong>Google Analytics 4</strong>, <strong>Hotjar</strong> and <strong>PostHog</strong> (PostHog Inc., US cloud) — usage analytics, anonymised interaction recordings and product analytics on the website, so we can see which tools and guides help and where they break. PostHog requests go through a reverse proxy we operate. Hotjar and PostHog mask typed text in form fields; we additionally mark tool inputs to be excluded.</li>
+        {!SITE.selfHosted && (
+          <li><strong>Google Analytics 4</strong>, <strong>Hotjar</strong> and <strong>PostHog</strong> (PostHog Inc., US cloud) — usage analytics, anonymised interaction recordings and product analytics on the website, so we can see which tools and guides help and where they break. PostHog requests go through a reverse proxy we operate. Hotjar and PostHog mask typed text in form fields; we additionally mark tool inputs to be excluded.</li>
+        )}
       </ul>
       <p>We do not sell personal data and we do not share it with advertisers.</p>
 
       <h2 id="cookies">Cookies and similar technologies</h2>
-      <p>
-        The tools themselves set no cookies. Google Analytics, Hotjar and PostHog set cookies to distinguish visitors and sessions, and they load <strong>only after you click "Accept"</strong> in the cookie banner. Your choice is stored in your browser for 12 months; you can change it any time via <a href="#cookies" data-cookie-settings>Cookie settings</a> in the footer. Declining does not affect any tool.
-      </p>
+      {SITE.selfHosted ? (
+        <p>
+          This instance sets no cookies and loads no analytics, so there is no cookie banner and nothing to opt in or out of.
+        </p>
+      ) : (
+        <p>
+          The tools themselves set no cookies. Google Analytics, Hotjar and PostHog set cookies to distinguish visitors and sessions, and they load <strong>only after you click "Accept"</strong> in the cookie banner. Your choice is stored in your browser for 12 months; you can change it any time via <a href="#cookies" data-cookie-settings>Cookie settings</a> in the footer. Declining does not affect any tool.
+        </p>
+      )}
 
       <h2>Retention</h2>
       <ul>
@@ -81,7 +102,7 @@ const updated = 'September 5, 2026';
         <li>Usage counters: two days.</li>
         <li>Subscriber emails: until you unsubscribe.</li>
         <li>Server logs (technical errors, no report content): 30 days.</li>
-        <li>Analytics: per Google Analytics, Hotjar and PostHog retention settings, currently 14 months or less.</li>
+        {!SITE.selfHosted && <li>Analytics: per Google Analytics, Hotjar and PostHog retention settings, currently 14 months or less.</li>}
       </ul>
 
       <h2>Your rights</h2>

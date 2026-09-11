@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "locan-tools"
+version = "0.1.0"
+description = "Local SEO command line tools and MCP server for the Locan API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+keywords = ["local-seo", "google-business-profile", "mcp", "cli", "schema-org"]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "httpx==0.28.1",
+  "typer==0.27.2",
+  "rich==15.0.0",
+  "mcp==2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+]
+
+[project.scripts]
+locan = "locan_tools.cli:main"
+locan-mcp = "locan_tools.mcp_server:main"
+
+[project.urls]
+Homepage = "https://locan.ai"
+Source = "https://github.com/vaitko/locan-tools"
+
+[tool.setuptools.packages.find]
+include = ["locan_tools*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

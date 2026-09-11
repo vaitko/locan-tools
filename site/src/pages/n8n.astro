@@ -1,0 +1,107 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Run Locan from n8n', href: '/n8n/' },
+];
+
+const steps = [
+  {
+    title: '1. Manual or Schedule Trigger',
+    text: 'Start the workflow by hand, or on a schedule (n8n-nodes-base.scheduleTrigger) to run the audit weekly.',
+  },
+  {
+    title: '2. Set — business input',
+    text: 'A Set node before the HTTP request defines businessName and city, so the workflow has something to send on a manual run.',
+  },
+  {
+    title: '3. HTTP Request — the audit',
+    text: 'POST to https://api.locan.ai/api/tools/gbp-optimizer with a JSON body of { businessName, city } (or { placeId } if you already have one).',
+  },
+  {
+    title: '4. Set — edit fields',
+    text: 'Map the fields you want out of the response: score, grade, summary, recommendations, ai.optimizedDescription.',
+  },
+  {
+    title: '5. Send Email (or Slack)',
+    text: 'Email the mapped fields to whoever owns the profile. Swap the Send Email node for n8n-nodes-base.slack to post to a channel instead — the fields feeding it stay the same.',
+  },
+];
+
+const schema = [breadcrumbSchema(crumbs)];
+---
+
+<BaseLayout
+  title="Run the Locan GBP Optimizer from n8n | Locan"
+  description="A ready-made n8n workflow: HTTP Request to the Locan GBP Optimizer API, Set node to map the response, Send Email to deliver the audit. Download the workflow JSON."
+  path="/n8n/"
+  schema={schema}
+>
+  <section class="relative overflow-hidden">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <div class="mx-auto mt-8 max-w-3xl text-center">
+        <h1 class="h1 mt-6">Run the Google Business Profile Optimizer from n8n</h1>
+        <p class="lead mt-5">
+          One workflow, five nodes, all core n8n: trigger → set the input → call the API → shape the
+          result → email it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x pb-16 text-center">
+    <a href="/n8n/locan-gbp-audit.json" download class="btn-primary">Download the workflow JSON</a>
+    <p class="mt-3 text-[15px] text-muted">Import it in n8n via Workflows → Import from File.</p>
+  </section>
+
+  <section class="bg-surface py-16">
+    <div class="container-x">
+      <SectionHeading align="left" eyebrow="The workflow" title="Trigger → Set → HTTP Request → Set → Email" />
+      <div class="mt-8 space-y-6">
+        {
+          steps.map((s) => (
+            <div class="card p-6">
+              <h3 class="h3">{s.title}</h3>
+              <p class="mt-2 text-[15px] leading-relaxed text-muted">{s.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x py-16">
+    <SectionHeading align="left" eyebrow="Exact request" title="The HTTP Request node, in detail" />
+    <div class="mt-6 max-w-3xl space-y-3 text-[17px] leading-relaxed text-ink/85">
+      <p><strong>Method:</strong> POST</p>
+      <p><strong>URL:</strong> <code>https://api.locan.ai/api/tools/gbp-optimizer</code></p>
+      <p><strong>Body type:</strong> JSON</p>
+    </div>
+    <pre class="mt-4 max-w-3xl overflow-x-auto rounded-xl bg-navy p-4 text-sm text-white"><code>{`={{ JSON.stringify({ businessName: $json.businessName, city: $json.city }) }}`}</code></pre>
+    <p class="mt-4 max-w-3xl text-[15px] text-muted">
+      The response is JSON with <code>score</code>, <code>grade</code>, <code>summary</code>,
+      <code>checks</code>, <code>recommendations</code> and an <code>ai</code> object (optimized
+      description, post ideas, FAQs, review reply templates, citation ideas). Errors come back as
+      <code>{'{ "error", "code" }'}</code>, with a 429 when the daily limit is hit.
+    </p>
+  </section>
+
+  <section class="bg-surface py-16">
+    <div class="container-x max-w-3xl">
+      <SectionHeading align="left" eyebrow="Limits" title="Hosted limits apply — self-host to remove them" />
+      <p class="mt-6 text-[17px] leading-relaxed text-ink/85">
+        The hosted API enforces daily per-visitor limits, so a scheduled workflow calling it for many
+        businesses can hit them. Self-hosting removes the limits — point the HTTP Request node's URL at
+        your own instance instead, for example <code>http://localhost:8080/api/tools/gbp-optimizer</code>.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-x py-16">
+    <a href="/mcp/" class="btn-secondary">Prefer an AI agent instead? Run it via MCP →</a>
+  </section>
+</BaseLayout>

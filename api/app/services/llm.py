@@ -18,7 +18,7 @@ import httpx
 from ..config import Settings
 from ..errors import ApiError
 
-DEFAULT_MODEL = "gpt-4o-mini"  # only meaningful for the openai provider; replicate uses Settings.llm_model
+DEFAULT_MODEL = "gpt-4o-mini"  # constructor default only; configure() always passes Settings.llm_model
 REPLICATE_API = "https://api.replicate.com/v1"
 JSON_INSTRUCTION = "Respond with a single valid JSON object only. No prose before or after it, no code fences."
 
@@ -28,10 +28,10 @@ class LlmProvider(Protocol):
 
 
 class OpenAIProvider:
-    def __init__(self, api_key: str, model: str = DEFAULT_MODEL) -> None:
+    def __init__(self, api_key: str, model: str = DEFAULT_MODEL, base_url: str | None = None) -> None:
         from openai import AsyncOpenAI
 
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url or None)
         self._model = model
 
     async def complete(self, messages, *, max_tokens, temperature, json_mode) -> str:
@@ -169,8 +169,10 @@ def configure(settings: Settings, http: httpx.AsyncClient | None = None) -> None
             reasoning_effort=settings.llm_reasoning_effort,
             verbosity=settings.llm_verbosity,
         )
-    elif settings.llm_provider == "openai" and settings.openai_api_key:
-        _provider = OpenAIProvider(settings.openai_api_key)
+    elif settings.llm_provider == "openai" and (settings.openai_api_key or settings.openai_base_url):
+        _provider = OpenAIProvider(
+            settings.openai_api_key or "local", settings.llm_model, settings.openai_base_url or None
+        )
 
 
 def _require_provider() -> LlmProvider:

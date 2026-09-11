@@ -28,7 +28,9 @@ DEFAULT_QUOTAS: dict[str, int] = {
 @dataclass(frozen=True)
 class Settings:
     env: str = "dev"
+    self_hosted: bool = False
     openai_api_key: str = ""
+    openai_base_url: str = ""
     replicate_api_token: str = ""
     llm_provider: str = "replicate"  # replicate | openai
     llm_model: str = "openai/gpt-5-nano"
@@ -61,16 +63,26 @@ class Settings:
             raw = os.environ.get(f"QUOTA_{key.upper()}")
             if raw and raw.isdigit():
                 limits[key] = int(raw)
+        self_hosted = os.environ.get("SELF_HOSTED", "").strip().lower() in {"1", "true", "yes", "on"}
+        raw_origins = os.environ.get("ALLOWED_ORIGINS")
+        if self_hosted and not (raw_origins or "").strip():
+            allowed_origins = ["*"]
+        elif raw_origins is not None:
+            allowed_origins = _csv(raw_origins)
+        else:
+            allowed_origins = ["http://localhost:4321", "http://localhost:4322"]
         return cls(
             env=os.environ.get("APP_ENV", "dev"),
+            self_hosted=self_hosted,
             openai_api_key=_secret("OPENAI_API_KEY"),
+            openai_base_url=os.environ.get("OPENAI_BASE_URL", "").strip().rstrip("/"),
             replicate_api_token=_secret("REPLICATE_API_TOKEN"),
             llm_provider=os.environ.get("LLM_PROVIDER", "replicate").strip().lower(),
             llm_model=os.environ.get("LLM_MODEL", "openai/gpt-5-nano").strip(),
             llm_reasoning_effort=os.environ.get("LLM_REASONING_EFFORT", "minimal").strip(),
             llm_verbosity=os.environ.get("LLM_VERBOSITY", "low").strip(),
             google_places_api_key=_secret("GOOGLE_PLACES_API_KEY"),
-            allowed_origins=_csv(os.environ.get("ALLOWED_ORIGINS", "http://localhost:4321,http://localhost:4322")),
+            allowed_origins=allowed_origins,
             origin_verify_secret=os.environ.get("ORIGIN_VERIFY_SECRET") or None,
             quota_table=os.environ.get("QUOTA_TABLE") or None,
             alert_email=os.environ.get("ALERT_EMAIL", "").strip(),

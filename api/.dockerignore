@@ -1,0 +1,15 @@
+.venv
+.aws-sam
+__pycache__
+.pytest_cache
+tests
+scripts
+deploy.sh
+template.yaml
+edge-template.yaml
+samconfig*.toml
+lambda_handler.py
+requirements-dev.txt
+.env*
+*.md
+.DS_Store

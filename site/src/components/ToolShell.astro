@@ -73,49 +73,57 @@ const schema = [
       <div class="card p-5 sm:p-8" id="tool">
         <slot name="form" />
 
-        <div class="mt-6 border-t border-line pt-5" data-email-optin data-source={`tool:${tool.slug}`} data-hj-suppress>
-          <label class="label" for={`optin-${tool.slug}`}>Your email <span class="font-normal text-muted">(optional — updates on autopilot)</span></label>
-          <div class="flex flex-col gap-2 sm:flex-row">
-            <input id={`optin-${tool.slug}`} type="email" autocomplete="email" placeholder="you@business.com" class="field flex-1" data-optin-email />
-          </div>
-          <p class="help">Get follow-ups for this report, improvements to this tool and every new free tool — free, one-click unsubscribe. We send a confirmation email first.</p>
-          <p class="hidden mt-2 text-sm font-semibold text-success" data-optin-ok>Check your inbox — click the confirmation link and you're set.</p>
+        {
+          !SITE.selfHosted && (
+            <div class="mt-6 border-t border-line pt-5" data-email-optin data-source={`tool:${tool.slug}`} data-hj-suppress>
+              <label class="label" for={`optin-${tool.slug}`}>Your email <span class="font-normal text-muted">(optional — updates on autopilot)</span></label>
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <input id={`optin-${tool.slug}`} type="email" autocomplete="email" placeholder="you@business.com" class="field flex-1" data-optin-email />
+              </div>
+              <p class="help">Get follow-ups for this report, improvements to this tool and every new free tool — free, one-click unsubscribe. We send a confirmation email first.</p>
+              <p class="hidden mt-2 text-sm font-semibold text-success" data-optin-ok>Check your inbox — click the confirmation link and you're set.</p>
 
-          <div class="hidden mt-4 rounded-2xl border border-accent-strong bg-primary-tint p-5" role="dialog" aria-live="polite" data-optin-gate>
-            <p class="text-[15px] font-semibold text-ink">Run it without an email? You'll miss the useful part on autopilot.</p>
-            <p class="mt-1.5 text-[14px] leading-relaxed text-ink/80">
-              With an email you get this report's follow-ups, the guide for your fixes, and every new free tool as it ships — no account, nothing to buy, unsubscribe in one click. Without it, this run is all you get.
-            </p>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button type="button" class="btn-primary btn-sm" data-optin-add>Add my email</button>
-              <button type="button" class="btn-secondary btn-sm" data-optin-skip>Continue without email</button>
+              <div class="hidden mt-4 rounded-2xl border border-accent-strong bg-primary-tint p-5" role="dialog" aria-live="polite" data-optin-gate>
+                <p class="text-[15px] font-semibold text-ink">Run it without an email? You'll miss the useful part on autopilot.</p>
+                <p class="mt-1.5 text-[14px] leading-relaxed text-ink/80">
+                  With an email you get this report's follow-ups, the guide for your fixes, and every new free tool as it ships — no account, nothing to buy, unsubscribe in one click. Without it, this run is all you get.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button type="button" class="btn-primary btn-sm" data-optin-add>Add my email</button>
+                  <button type="button" class="btn-secondary btn-sm" data-optin-skip>Continue without email</button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )
+        }
       </div>
       <div id="tool-results" class="mt-8 scroll-mt-24">
         <slot name="results" />
-        <div id="after-use" class="mt-8 hidden" data-after-use>
-          <div class="card grid gap-6 bg-navy p-6 text-white sm:p-8 md:grid-cols-[1.2fr_1fr] md:items-center">
-            <div>
-              <p class="eyebrow text-accent">Free, forever — keep it that way for you</p>
-              <h2 class="mt-2 font-semibold tracking-tight text-2xl sm:text-3xl">Want new free tools and updates to this one?</h2>
-              <p class="mt-3 text-[15px] text-white/75">
-                Leave your email and you get one short message when a new free local SEO tool ships or this one improves. No account, nothing to buy, <strong class="text-white">unsubscribe any time with one click</strong>.
-              </p>
-              <p class="mt-3 text-[14px] text-white/60">Missing a tool? <a href="/request-a-tool/" class="font-semibold text-accent underline underline-offset-[3px]">Ask and we build it for free within 3 days.</a></p>
-            </div>
-            <form class="grid gap-3" data-subscribe data-source={`tool:${tool.slug}:after`} data-hj-suppress novalidate>
-              <label class="sr-only" for={`after-${tool.slug}`}>Email address</label>
-              <div class="flex flex-col gap-2 sm:flex-row">
-                <input id={`after-${tool.slug}`} type="email" name="email" required autocomplete="email" placeholder="you@business.com" class="field flex-1 text-ink" />
-                <button type="submit" class="btn-accent shrink-0">Keep me posted</button>
+        {
+          !SITE.selfHosted && (
+            <div id="after-use" class="mt-8 hidden" data-after-use>
+              <div class="card grid gap-6 bg-navy p-6 text-white sm:p-8 md:grid-cols-[1.2fr_1fr] md:items-center">
+                <div>
+                  <p class="eyebrow text-accent">Free, forever — keep it that way for you</p>
+                  <h2 class="mt-2 font-semibold tracking-tight text-2xl sm:text-3xl">Want new free tools and updates to this one?</h2>
+                  <p class="mt-3 text-[15px] text-white/75">
+                    Leave your email and you get one short message when a new free local SEO tool ships or this one improves. No account, nothing to buy, <strong class="text-white">unsubscribe any time with one click</strong>.
+                  </p>
+                  <p class="mt-3 text-[14px] text-white/60">Missing a tool? <a href="/request-a-tool/" class="font-semibold text-accent underline underline-offset-[3px]">Ask and we build it for free within 3 days.</a></p>
+                </div>
+                <form class="grid gap-3" data-subscribe data-source={`tool:${tool.slug}:after`} data-hj-suppress novalidate>
+                  <label class="sr-only" for={`after-${tool.slug}`}>Email address</label>
+                  <div class="flex flex-col gap-2 sm:flex-row">
+                    <input id={`after-${tool.slug}`} type="email" name="email" required autocomplete="email" placeholder="you@business.com" class="field flex-1 text-ink" />
+                    <button type="submit" class="btn-accent shrink-0">Keep me posted</button>
+                  </div>
+                  <p class="hidden text-sm font-semibold text-emerald-300" data-ok>Check your inbox — click the confirmation link and you're set.</p>
+                  <p class="hidden text-sm font-semibold text-rose-300" data-err>Please enter a valid email address.</p>
+                </form>
               </div>
-              <p class="hidden text-sm font-semibold text-emerald-300" data-ok>Check your inbox — click the confirmation link and you're set.</p>
-              <p class="hidden text-sm font-semibold text-rose-300" data-err>Please enter a valid email address.</p>
-            </form>
-          </div>
-        </div>
+            </div>
+          )
+        }
       </div>
     </div>
   </section>

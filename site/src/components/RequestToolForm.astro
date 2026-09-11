@@ -3,6 +3,7 @@
  * "Ask for a free tool" form — the platform's main entry point. Posts to /api/tool-requests.
  */
 import Icon from './Icon.astro';
+import { SITE } from '../data/site';
 
 interface Props {
   source?: string;
@@ -13,40 +14,53 @@ const { source = 'home', compact = false, class: cls = '' } = Astro.props;
 const id = `req-${source}`;
 ---
 
-<form class:list={['card grid gap-4 p-6 sm:p-7', cls]} data-tool-request data-source={source} data-hj-suppress novalidate>
-  <div>
-    <p class="eyebrow">Ask for a free tool</p>
-    <h3 class="mt-1.5 font-semibold tracking-tight text-[1.65rem] leading-tight text-ink">What should we build for you?</h3>
-    {!compact && <p class="mt-2 text-[14.5px] leading-relaxed text-muted">Describe the local SEO problem or the tool you wish existed. We build it for free, usually within 3 days, and email you when it is live.</p>}
-  </div>
-
-  <div>
-    <label class="label" for={`${id}-text`}>The tool or problem</label>
-    <textarea id={`${id}-text`} name="request" required minlength="10" maxlength="2000" rows={compact ? 3 : 4} class="field resize-y" placeholder="e.g. Check whether my opening hours match across Google, Apple Maps and Bing — for 12 locations at once."></textarea>
-  </div>
-
-  <div class="grid gap-3 sm:grid-cols-2">
+{SITE.selfHosted ? (
+  <div class:list={['card grid gap-4 p-6 sm:p-7', cls]}>
     <div>
-      <label class="label" for={`${id}-email`}>Your email</label>
-      <input id={`${id}-email`} type="email" name="email" required autocomplete="email" class="field" placeholder="you@business.com" />
-      <p class="help">So we can tell you when it's ready.</p>
+      <p class="eyebrow">Ask for a free tool</p>
+      <h3 class="mt-1.5 font-semibold tracking-tight text-[1.65rem] leading-tight text-ink">What should we build for you?</h3>
+      {!compact && <p class="mt-2 text-[14.5px] leading-relaxed text-muted">Describe the local SEO problem or the tool you wish existed by opening an issue on GitHub.</p>}
     </div>
+    <a href={`${SITE.sourceUrl}/issues/new`} target="_blank" rel="noopener" class="btn-primary w-fit shrink-0">
+      Request on GitHub <Icon name="arrow" size={16} />
+    </a>
+  </div>
+) : (
+  <form class:list={['card grid gap-4 p-6 sm:p-7', cls]} data-tool-request data-source={source} data-hj-suppress novalidate>
     <div>
-      <label class="label" for={`${id}-business`}>Business or website <span class="font-normal text-muted">(optional)</span></label>
-      <input id={`${id}-business`} type="text" name="business" maxlength="200" class="field" placeholder="Radiant Plumbing, Austin" />
+      <p class="eyebrow">Ask for a free tool</p>
+      <h3 class="mt-1.5 font-semibold tracking-tight text-[1.65rem] leading-tight text-ink">What should we build for you?</h3>
+      {!compact && <p class="mt-2 text-[14.5px] leading-relaxed text-muted">Describe the local SEO problem or the tool you wish existed. We build it for free, usually within 3 days, and email you when it is live.</p>}
     </div>
-  </div>
 
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <p class="text-xs leading-relaxed text-muted">Free, no commitment. You'll also get one short email when any new tool ships — unsubscribe any time with one click.</p>
-    <button type="submit" class="btn-primary shrink-0">Request my free tool <Icon name="arrow" size={16} /></button>
-  </div>
+    <div>
+      <label class="label" for={`${id}-text`}>The tool or problem</label>
+      <textarea id={`${id}-text`} name="request" required minlength="10" maxlength="2000" rows={compact ? 3 : 4} class="field resize-y" placeholder="e.g. Check whether my opening hours match across Google, Apple Maps and Bing — for 12 locations at once."></textarea>
+    </div>
 
-  <p class="hidden rounded-xl bg-success-tint px-4 py-3 text-sm font-semibold text-success" data-ok>
-    Got it — a human will read this today. We&#39;ll email you the link when your tool is live, usually within 3 days. Check your inbox now for a confirmation email.
-  </p>
-  <p class="hidden alert-error" data-err></p>
-</form>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div>
+        <label class="label" for={`${id}-email`}>Your email</label>
+        <input id={`${id}-email`} type="email" name="email" required autocomplete="email" class="field" placeholder="you@business.com" />
+        <p class="help">So we can tell you when it's ready.</p>
+      </div>
+      <div>
+        <label class="label" for={`${id}-business`}>Business or website <span class="font-normal text-muted">(optional)</span></label>
+        <input id={`${id}-business`} type="text" name="business" maxlength="200" class="field" placeholder="Radiant Plumbing, Austin" />
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-xs leading-relaxed text-muted">Free, no commitment. You'll also get one short email when any new tool ships — unsubscribe any time with one click.</p>
+      <button type="submit" class="btn-primary shrink-0">Request my free tool <Icon name="arrow" size={16} /></button>
+    </div>
+
+    <p class="hidden rounded-xl bg-success-tint px-4 py-3 text-sm font-semibold text-success" data-ok>
+      Got it — a human will read this today. We&#39;ll email you the link when your tool is live, usually within 3 days. Check your inbox now for a confirmation email.
+    </p>
+    <p class="hidden alert-error" data-err></p>
+  </form>
+)}
 
 <script>
   import { apiFetch, ApiClientError } from '../scripts/api';

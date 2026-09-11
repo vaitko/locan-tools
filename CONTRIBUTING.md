@@ -31,6 +31,19 @@ A tool is three files plus tests:
 Cost matters: prefer Places field masks that stay in the Essentials/Pro SKUs, cap upstream calls per run, and
 say on the page what the tool can and cannot see.
 
+## CLI / MCP package
+
+`cli/` is the `locan-tools` package: `locan` (CLI) and `locan-mcp` (MCP server). Set it up and test it with:
+
+```bash
+cd cli && python -m venv .venv && .venv/bin/pip install -e '.[dev]' && .venv/bin/pytest -q
+```
+
+Shared HTTP logic lives in `cli/locan_tools/client.py` — CLI commands and MCP tools both go through it, so a
+new tool means one client method plus a thin wrapper in each. What an agent knows about a tool comes from the
+`description=` string in `cli/locan_tools/mcp_server.py` (not a docstring): say what it returns, when to use
+it, what it costs, and name the arguments exactly as the function signature does (`place_id`, not `placeId`).
+
 ## Style
 
 Python: type hints, pydantic v2, `ApiError(status, code, message)` for errors, 120-char lines.

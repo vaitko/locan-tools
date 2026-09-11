@@ -59,7 +59,9 @@ const principles = [
   {
     icon: 'mail',
     title: 'No noise',
-    text: 'One short email when a new tool ships, if you ask for it. No drip campaigns, no webinars, no "book a call" buttons.',
+    text: SITE.selfHosted
+      ? 'No newsletter, no drip campaigns, no webinars, no "book a call" buttons. This self-hosted instance sends no e-mail at all.'
+      : 'One short email when a new tool ships, if you ask for it. No drip campaigns, no webinars, no "book a call" buttons.',
   },
 ];
 ---

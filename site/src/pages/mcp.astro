@@ -1,0 +1,167 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Faq, { faqSchema } from '../components/Faq.astro';
+import { SITE } from '../data/site';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Run Locan from an agent', href: '/mcp/' },
+];
+
+const tools = [
+  { name: 'find_business', returns: 'Candidate matches: placeId, name, address', needs: 'Places key' },
+  { name: 'gbp_audit', returns: 'Score /100, grade, per-factor checks, AI suggestions', needs: 'Places key + LLM' },
+  { name: 'gbp_categories', returns: 'Category comparison and add/keep/review recommendations', needs: 'Places key' },
+  { name: 'rank_grid', returns: 'Grid of map ranks, summary, outranking competitors', needs: 'Places key' },
+  { name: 'ai_visibility', returns: 'AI mention score, per-engine results, missing topics', needs: 'LLM' },
+  { name: 'review_reply', returns: 'Three draft review replies plus handling tips', needs: 'LLM' },
+  { name: 'review_link', returns: 'Direct Google review link for a place id', needs: 'None' },
+  { name: 'schema_jsonld', returns: 'LocalBusiness JSON-LD built from the Google profile', needs: 'Places key' },
+];
+
+const faq = [
+  {
+    q: 'What does a rank_grid call cost?',
+    a: 'One Google Places request per grid cell: 9 for the default 3×3 grid, 25 for a 5×5 grid. It is the most expensive of the eight tools.',
+  },
+  {
+    q: 'Does any of this change my Google Business Profile?',
+    a: 'No. Every tool reads public Google data; none of them can edit a profile. Every recommendation is applied by you, in your own Google Business Profile or website.',
+  },
+  {
+    q: 'Can I self-host to remove the daily limits?',
+    a: 'Yes. Point LOCAN_API_URL at your own instance (for example http://localhost:8080/api) and the hosted daily limits no longer apply. See the self-host guide.',
+  },
+  {
+    q: 'Which AI models does this use?',
+    a: 'The hosted API uses a Replicate-hosted model. A self-hosted instance can use Replicate, OpenAI directly, or any OpenAI-compatible endpoint such as Ollama via OPENAI_BASE_URL.',
+  },
+];
+
+const schema = [breadcrumbSchema(crumbs), faqSchema(faq)];
+---
+
+<BaseLayout
+  title="Run Locan from Claude, OpenClaw, Cursor or n8n | Locan"
+  description="Locan ships an MCP server and CLI over the same API as locan.ai: find_business, gbp_audit, gbp_categories, rank_grid, ai_visibility, review_reply, review_link and schema_jsonld."
+  path="/mcp/"
+  schema={schema}
+>
+  <section class="relative overflow-hidden">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <div class="mx-auto mt-8 max-w-3xl text-center">
+        <h1 class="h1 mt-6">Run Locan from Claude, OpenClaw, Cursor or n8n</h1>
+        <p class="lead mt-5">
+          The same local SEO tools behind locan.ai, callable from an AI agent or a workflow tool over MCP,
+          a CLI, or plain HTTP.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x pb-16">
+    <SectionHeading align="left" eyebrow="What it is" title="An MCP server and a CLI over the Locan API" />
+    <div class="mt-6 max-w-3xl space-y-4 text-[17px] leading-relaxed text-ink/85">
+      <p>
+        The <code>locan-tools</code> package installs two thin HTTP clients: <code>locan</code>, a CLI, and
+        <code>locan-mcp</code>, an MCP server exposing the same eight tools over stdio (or streamable HTTP
+        with <code>locan-mcp --http --port 8765</code>). Neither holds a Google Places or LLM key — both
+        call the Locan API, hosted or self-hosted.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-surface py-16">
+    <div class="container-x">
+      <SectionHeading align="left" eyebrow="Claude Code" title="Add the MCP server with one command" />
+      <pre class="mt-6 max-w-3xl overflow-x-auto rounded-xl bg-navy p-4 text-sm text-white"><code>claude mcp add locan -- uvx --from locan-tools locan-mcp</code></pre>
+    </div>
+  </section>
+
+  <section class="container-x py-16">
+    <SectionHeading align="left" eyebrow="Claude Desktop / Cursor" title="Or configure it as a JSON MCP server" />
+    <pre class="mt-6 max-w-3xl overflow-x-auto rounded-xl bg-navy p-4 text-sm text-white"><code>{`{
+  "mcpServers": {
+    "locan": {
+      "command": "uvx",
+      "args": ["--from", "locan-tools", "locan-mcp"],
+      "env": { "LOCAN_API_URL": "https://api.locan.ai/api" }
+    }
+  }
+}`}</code></pre>
+    <p class="mt-4 max-w-3xl text-[15px] text-muted">
+      Point <code>LOCAN_API_URL</code> at a self-hosted instance to skip the hosted daily limits — see
+      <a href="/self-host/" class="link">self-hosting Locan</a>.
+    </p>
+  </section>
+
+  <section class="bg-surface py-16">
+    <div class="container-x">
+      <SectionHeading align="left" eyebrow="Reference" title="The eight tools" />
+      <div class="mt-8 overflow-x-auto rounded-2xl border border-line bg-white">
+        <table class="w-full text-left text-[15px]">
+          <thead>
+            <tr class="border-b border-line bg-surface">
+              <th class="px-4 py-3 font-bold text-ink">MCP tool</th>
+              <th class="px-4 py-3 font-bold text-ink">What it returns</th>
+              <th class="px-4 py-3 font-bold text-ink">Needs</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              tools.map((t) => (
+                <tr class="border-b border-line last:border-0">
+                  <td class="px-4 py-3 font-mono text-[14px]">{t.name}</td>
+                  <td class="px-4 py-3 text-muted">{t.returns}</td>
+                  <td class="px-4 py-3 text-muted">{t.needs}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-[15px] text-muted">
+        The CLI exposes the same eight operations as hyphenated commands (<code>find-business</code>,
+        <code>gbp-audit</code>, <code>gbp-categories</code>, <code>rank-grid</code>,
+        <code>ai-visibility</code>, <code>review-reply</code>, <code>review-link</code>,
+        <code>schema-jsonld</code>) — see{' '}
+        <a href={`${SITE.sourceUrl}/blob/main/cli/README.md`} class="link" rel="noopener" target="_blank">
+          cli/README.md
+        </a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-x py-16">
+    <SectionHeading align="left" eyebrow="For agent workflows" title="Building an audit skill" />
+    <div class="mt-6 max-w-3xl space-y-4 text-[17px] leading-relaxed text-ink/85">
+      <p>
+        <code>skills/locan-local-seo/SKILL.md</code> in the repository is a ready-made procedure for
+        auditing a business with these tools: resolve the business, run the audit, check categories and
+        rankings, check AI visibility, then write a prioritised fix list. Drop it into an agent's skills
+        directory, or read it as a reference for the call order and defaults.
+      </p>
+      <p>
+        Prefer a workflow tool instead of an agent? See{' '}
+        <a href="/n8n/" class="link">running the profile optimizer from n8n</a>.
+      </p>
+    </div>
+    <a
+      href={`${SITE.sourceUrl}/blob/main/skills/locan-local-seo/SKILL.md`}
+      rel="noopener"
+      target="_blank"
+      class="btn-secondary mt-2 inline-flex"
+    >
+      View the skill on GitHub
+    </a>
+  </section>
+
+  <section class="bg-surface py-20">
+    <div class="container-x max-w-3xl">
+      <Faq items={faq} title="Questions about the MCP server and CLI" />
+    </div>
+  </section>
+</BaseLayout>

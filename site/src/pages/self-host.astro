@@ -1,0 +1,116 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs, { breadcrumbSchema } from '../components/Breadcrumbs.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { SITE } from '../data/site';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Self-host Locan', href: '/self-host/' },
+];
+
+const needs = [
+  { tool: 'Google Business Profile Optimizer', places: true, llm: true },
+  { tool: 'GBP Category Optimizer', places: true, llm: false },
+  { tool: 'Local Rank Checker', places: true, llm: false },
+  { tool: 'AI Visibility Checker', places: false, llm: true },
+  { tool: 'AI Review Response Generator', places: false, llm: true },
+  { tool: 'LocalBusiness Schema Generator', places: false, llm: false },
+  { tool: 'Google Review Link & QR Poster', places: false, llm: false },
+];
+
+const schema = [breadcrumbSchema(crumbs)];
+---
+
+<BaseLayout
+  title="Self-host Locan in 3 Commands | Locan"
+  description="Run every Locan local SEO tool on your own server with Docker Compose: no daily limits, no client data leaving your infrastructure, your own LLM key."
+  path="/self-host/"
+  schema={schema}
+>
+  <section class="relative overflow-hidden">
+    <div class="container-x py-12 lg:py-16">
+      <Breadcrumbs items={crumbs} />
+      <div class="mx-auto mt-8 max-w-3xl text-center">
+        <h1 class="h1 mt-6">Self-host Locan in 3 commands</h1>
+        <p class="lead mt-5">
+          Same tools as locan.ai, running on your own server with Docker Compose — no daily limits, no
+          database, no account.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x pb-16">
+    <pre class="mx-auto max-w-2xl overflow-x-auto rounded-xl bg-navy p-4 text-sm text-white"><code>{`git clone https://github.com/vaitko/locan-tools.git && cd locan-tools
+cp .env.example .env                 # fill in GOOGLE_PLACES_API_KEY
+docker compose up --build`}</code></pre>
+    <p class="mx-auto mt-4 max-w-2xl text-[15px] text-muted">
+      The site is then on <code>http://localhost:8080</code>, with the API behind <code>/api</code>.
+    </p>
+  </section>
+
+  <section class="bg-surface py-16">
+    <div class="container-x">
+      <SectionHeading align="left" eyebrow="What you need" title="Docker, a Places key, and an LLM" />
+      <ul class="mt-6 max-w-2xl list-disc space-y-2 pl-6 text-[17px] leading-relaxed text-ink/85">
+        <li>Docker and Docker Compose.</li>
+        <li>A Google Places API (New) key, set as <code>GOOGLE_PLACES_API_KEY</code>.</li>
+        <li>
+          An LLM: a Replicate token (<code>REPLICATE_API_TOKEN</code>, the default), an OpenAI key
+          (<code>LLM_PROVIDER=openai</code> + <code>OPENAI_API_KEY</code>, with
+          <code>LLM_MODEL</code> set to an OpenAI model such as <code>gpt-4o-mini</code>), or an
+          OpenAI-compatible endpoint such as Ollama via <code>OPENAI_BASE_URL</code>. Whatever you pick,
+          <code>LLM_MODEL</code> has to be a model name that provider accepts.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="container-x py-16">
+    <SectionHeading align="left" eyebrow="Which tools need what" title="Not every tool calls Google or an LLM" />
+    <div class="mt-8 overflow-x-auto rounded-2xl border border-line bg-white">
+      <table class="w-full text-left text-[15px]">
+        <thead>
+          <tr class="border-b border-line bg-surface">
+            <th class="px-4 py-3 font-bold text-ink">Tool</th>
+            <th class="px-4 py-3 font-bold text-ink">Needs Places key</th>
+            <th class="px-4 py-3 font-bold text-ink">Needs LLM</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            needs.map((n) => (
+              <tr class="border-b border-line last:border-0">
+                <td class="px-4 py-3 text-ink">{n.tool}</td>
+                <td class="px-4 py-3 text-muted">{n.places ? 'Yes' : '—'}</td>
+                <td class="px-4 py-3 text-muted">{n.llm ? 'Yes' : '—'}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="bg-surface py-16">
+    <div class="container-x max-w-3xl">
+      <SectionHeading align="left" eyebrow="What self-hosting removes" title="No quotas, no analytics, no e-mail capture" />
+      <p class="mt-6 text-[17px] leading-relaxed text-ink/85">
+        The self-hosted build is the same code as locan.ai with <code>SELF_HOSTED=true</code> /
+        <code>PUBLIC_SELF_HOSTED=true</code>: the daily per-visitor quotas are gone, there is no analytics
+        or cookie consent, and there is no e-mail capture. There is also no database and no auth — put it
+        behind your own reverse proxy if you expose it beyond localhost.
+      </p>
+    </div>
+  </section>
+
+  <section class="container-x py-16">
+    <div class="flex flex-wrap gap-4">
+      <a href={`${SITE.sourceUrl}#self-host-in-3-commands`} rel="noopener" target="_blank" class="btn-primary">
+        Full instructions on GitHub
+      </a>
+      <a href="/mcp/" class="btn-secondary">Run it from an agent or n8n →</a>
+    </div>
+  </section>
+</BaseLayout>

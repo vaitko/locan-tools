@@ -11,7 +11,7 @@ const year = new Date().getFullYear();
 
 <footer class="mt-24 border-t border-line bg-surface">
   <div class="container-x py-14">
-    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_0.9fr]">
+    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_0.9fr]">
       <div>
         <a href="/" class="inline-flex" aria-label={`${SITE.name} home`}>
           <img src={SITE.logo} alt={`${SITE.name} — free local SEO tools`} width="120" height="32" class="h-8 w-auto" />
@@ -24,7 +24,7 @@ const year = new Date().getFullYear();
         </ul>
         {SITE.sourceUrl && (
           <a href={SITE.sourceUrl} rel="noopener" target="_blank" class="btn-secondary btn-sm mt-6 inline-flex items-center gap-2">
-            <Icon name="github" size={18} /> Open source on GitHub
+            <Icon name="github" size={18} /> {SITE.selfHosted ? 'Self-hosted instance · source on GitHub' : 'Open source on GitHub'}
           </a>
         )}
       </div>
@@ -55,7 +55,16 @@ const year = new Date().getFullYear();
           <li><a href={`mailto:${SITE.contactEmail}`} class="text-[15px] text-muted hover:text-primary">Contact</a></li>
           <li><a href="/privacy/" class="text-[15px] text-muted hover:text-primary">Privacy</a></li>
           <li><a href="/terms/" class="text-[15px] text-muted hover:text-primary">Terms</a></li>
-          <li><a href="/privacy/#cookies" class="text-[15px] text-muted hover:text-primary" data-cookie-settings>Cookie settings</a></li>
+          {!SITE.selfHosted && <li><a href="/privacy/#cookies" class="text-[15px] text-muted hover:text-primary" data-cookie-settings>Cookie settings</a></li>}
+        </ul>
+      </nav>
+
+      <nav aria-label="Developers">
+        <h2 class="mb-4 text-sm font-extrabold uppercase tracking-wider text-ink">Developers</h2>
+        <ul class="space-y-2.5">
+          <li><a href="/mcp/" class="text-[15px] text-muted hover:text-primary">MCP server &amp; CLI</a></li>
+          <li><a href="/self-host/" class="text-[15px] text-muted hover:text-primary">Self-host</a></li>
+          <li><a href="/n8n/" class="text-[15px] text-muted hover:text-primary">n8n workflow</a></li>
           {SITE.sourceUrl && <li><a href={SITE.sourceUrl} rel="noopener" target="_blank" class="inline-flex items-center gap-1.5 text-[15px] text-muted hover:text-primary"><Icon name="github" size={15} /> Source code (AGPL)</a></li>}
         </ul>
       </nav>
